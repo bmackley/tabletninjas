@@ -82,7 +82,7 @@
       ready: function(){
         firebase.auth().onAuthStateChanged(function(user) {
           if (user) {
-            alert('you are already logged in')
+            window.location('/upload')
           } else {
             // No user is signed in.
           }
