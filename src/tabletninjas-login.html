@@ -1,0 +1,108 @@
+<link href="../bower_components/polymer/polymer.html" rel="import">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-card/paper-card.html">
+
+<dom-module id="tabletninjas-login">
+  <style>
+    /* CSS rules for your element */
+      :host {
+        display: block;
+      }
+      #tabletninjas-background{
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url('../images/homeTablet.jpeg') center;
+        background-size: cover;
+        color: white;
+      }
+      #login-form{
+        width: 300px;
+        max-width: 100%;
+        height: 350px;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        margin: auto;
+        position: absolute;
+        background: black;
+        color: white;
+        --paper-card-header-color: white;
+        --paper-input-container-color: white;
+        --paper-input-container-focus-color: white;
+      }
+      .form-field{
+        --paper-input-container-focus-color: white;
+        --paper-input-container-input-color: white;
+      }
+      paper-button{
+        border-color: white;
+        border-width: 2px;
+        border-style: solid;
+      }
+      paper-button.maroon{
+        background-color: maroon;
+      }
+      a{
+        color: inherit;
+        text-decoration: none;
+      }
+      .action-buttons{
+        margin: 10px;
+
+      }
+  </style>
+  <template>
+    <!-- local DOM for your element -->
+    <tabletninjas-header></tabletninjas-header>
+    <div id="tabletninjas-background">
+      <paper-card heading="Login" id="login-form">
+        <div class="card-content">
+          <paper-input name="email" class=" form-field" id = "loginEmail" label="Email" required auto-validate></paper-input>
+          <paper-input name="password" class=" form-field" id = "loginPassword" label="Password" type="password" required auto-validate></paper-input>
+        </div>
+        <center>
+          <div class="action-buttons">
+            <paper-button class="login-submit" on-click="loginSubmit">Submit</paper-button>
+            <a href="/home"><paper-button>Cancel</paper-button></a>
+          </div>
+          <div class="action-buttons">Forgot Email</div>
+        </center>
+      </paper-card>
+    </div>
+  </template>
+  <script>
+    Polymer({
+      is: 'tabletninjas-login',
+      ready: function(){
+        firebase.auth().onAuthStateChanged(function(user) {
+          if (user) {
+            alert('you are already logged in')
+          } else {
+            // No user is signed in.
+          }
+        });
+      },
+      loginSubmit: function() {
+        const email = this.$.loginEmail.value
+        const password = this.$.loginPassword.value
+        firebase.auth().signInWithEmailAndPassword(email, password).catch(function(error) {
+          // Handle Errors here.
+          var errorCode = error.code;
+          var errorMessage = error.message;
+          if (errorCode === 'auth/wrong-password') {
+            alert('Wrong password.');
+          } else {
+            alert(errorMessage);
+          }
+          return;
+        });
+      },
+    });
+  </script>
+</dom-module>

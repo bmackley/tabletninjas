@@ -1,0 +1,92 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<!-- <link rel="import" href="../bower_components/iron-form/iron-form.html"> -->
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../bower_components/iron-icon/iron-icon.html">
+<!-- <link rel="import" href="tabletninjas-login.html"> -->
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="tabletninjas-tag">
+  <style include="shared-styles">
+    :host {
+      display: block;
+      background-color: black;
+    }
+    /*#flex-container{
+      display: flex;
+      flex-direction: column;
+    }*/
+    #Tablet{
+      width: 100%;
+    }
+    #footer-container {
+      width: 100%;
+      background-color: black;
+      position: fixed;
+      bottom:0px;
+      opacity: .85;
+    }
+    #signs{
+      overflow: auto;
+      white-space: nowrap;
+    }
+    #signs > * {
+      vertical-align: middle;
+    }
+    #signs #signs-scroll {
+      display: inline-block;
+    }
+    #signs img {
+      width: 11%;
+      display: inline-block;
+      /*maybe figure out a way to get the images on the same line and to scroll?*/
+    }
+    #line-title{
+      width:
+    }
+    .big{
+      --iron-icon-fill-color: white;
+
+      --iron-icon-width: 5%;
+      border-color: white;
+      border-style: solid;
+      border-radius:15%
+    }
+
+  </style>
+  <template>
+    <div>
+      <img id ='Tablet' src ="../images/KUG03-obv-01.jpg">
+    </div>
+    <div id = "footer-container">
+      <center><div class ="black-background" id><iron-icon class = "big" icon="arrow-back"></iron-icon><span style="color:white">Line 1</span><iron-icon class = "big" icon="arrow-forward"></iron-icon></div></center>
+      <div id = "signs">
+        <span id = "signs-scroll">
+          <img src ="../images/signs/001.png">
+          <img src ="../images/signs/002a.png">
+          <img src ="../images/signs/001.png">
+          <img src ="../images/signs/002a.png">
+          <img src ="../images/signs/001.png">
+          <img src ="../images/signs/002a.png">
+          <img src ="../images/signs/001.png">
+          <img src ="../images/signs/001.png">
+          <img src ="../images/signs/001.png">
+          <img src ="../images/signs/001.png">
+        </span>
+      </div>
+    </div>
+  </template>
+  <!-- <script src = "../bower_components/interact.js"></script> -->
+  <script>
+    Polymer({
+      is: 'tabletninjas-tag',
+      properties: {
+        username: String
+      },
+      ready: function() {
+
+      }
+    });
+  </script>
+</dom-module>

@@ -1,0 +1,25 @@
+{
+  "entrypoint": "index.html",
+  "shell": "src/my-app.html",
+  "fragments": [
+    "src/tabletninjas-home.html",
+    "src/tabletninjas-login.html",
+    "src/tabletninjas-tag.html",
+    "src/tabletninjas-upload.html",
+    "src/tabletninjas-signup.html",
+    "src/tabletninjas-header.html",
+    "src/my-view1.html",
+    "src/my-view2.html",
+    "src/my-view3.html",
+    "src/my-view404.html"
+  ],
+  "sourceGlobs": [
+    "src/**/*",
+    "images/**/*",
+    "bower.json"
+  ],
+  "includeDependencies": [
+    "manifest.json",
+    "bower_components/webcomponentsjs/webcomponents-lite.min.js"
+  ]
+}

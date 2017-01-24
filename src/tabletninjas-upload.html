@@ -1,0 +1,266 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/iron-form/iron-form.html">
+<link rel="import" href="../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html" >
+<link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu.html" >
+<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html" >
+<link rel="import" href="../bower_components/paper-item/paper-item.html" >
+<link rel="import" href="../bower_components/paper-toast/paper-toast.html" >
+<link rel="import" href="../bower_components/vaadin-upload/vaadin-upload.html">
+<link rel="import" href="tabletninjas-header.html">
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="tabletninjas-upload">
+  /*<style include="shared-styles">
+    :host {
+      display: block;
+    }
+    #uploadImage{
+      width:66%;
+    }
+    #uploadSuccess{
+      --paper-toast-background-color: green;
+      --paper-toast-color: white;
+    }
+
+  </style>*/
+  <template>
+    <tabletninjas-header></tabletninjas-header>
+    <center>
+    <paper-card id = "uploadImage" heading ="Upload Image">
+      <form class="card-content" is="iron-form" id="form"> <!-- Kt94k first -->
+        <paper-dropdown-menu label="Season or Collection">
+          <paper-listbox class="dropdown-content" id="imageSeason" selected="Kt94k" attr-for-selected = 'id'>
+            <paper-item id="Kt73k">Kt73k</paper-item>
+            <paper-item id="Kt74k">Kt74k</paper-item>
+            <paper-item id="Kt75k">Kt75k</paper-item>
+            <paper-item id="Kt76k">Kt76k</paper-item>
+            <paper-item id="Kt77k">Kt77k</paper-item>
+            <paper-item id="Kt78k">Kt78k</paper-item>
+            <paper-item id="Kt79k">Kt79k</paper-item>
+            <paper-item id="Kt80k">Kt80k</paper-item>
+            <paper-item id="Kt81k">Kt81k</paper-item>
+            <paper-item id="Kt82k">Kt82k</paper-item>
+            <paper-item id="Kt83k">Kt83k</paper-item>
+            <paper-item id="Kt84k">Kt84k</paper-item>
+            <paper-item id="Kt85k">Kt85k</paper-item>
+            <paper-item id="Kt86k">Kt86k</paper-item>
+            <paper-item id="Kt87k">Kt87k</paper-item>
+            <paper-item id="Kt88k">Kt88k</paper-item>
+            <paper-item id="Kt89k">Kt89k</paper-item>
+            <paper-item id="Kt90k">Kt90k</paper-item>
+            <paper-item id="Kt91k">Kt91k</paper-item>
+            <paper-item id="Kt92k">Kt92k</paper-item>
+            <paper-item id="Kt93k">Kt93k</paper-item>
+            <paper-item id="Kt94k">Kt94k</paper-item>
+            <paper-item id="Kt95k">Kt95k</paper-item>
+            <paper-item id="Kt96k">Kt96k</paper-item>
+            <paper-item id="Kt97k">Kt97k</paper-item>
+            <paper-item id="Kt98k">Kt98k</paper-item>
+            <paper-item id="Kt99k">Kt99k</paper-item>
+            <paper-item id="Kt00k">Kt00k</paper-item>
+            <paper-item id="Kt01k">Kt01k</paper-item>
+            <paper-item id="Kt02k">Kt02k</paper-item>
+            <paper-item id="Kt03k">Kt03k</paper-item>
+            <paper-item id="Kt04k">Kt04k</paper-item>
+            <paper-item id="Kt05k">Kt05k</paper-item>
+            <paper-item id="Kt06k">Kt06k</paper-item>
+            <paper-item id="Kt07k">Kt07k</paper-item>
+            <paper-item id="Kt08k">Kt08k</paper-item>
+            <paper-item id="Kt09k">Kt09k</paper-item>
+            <paper-item id="Kt10k">Kt10k</paper-item>
+            <paper-item id="Kt11k">Kt11k</paper-item>
+            <paper-item id="Kt12k">Kt12k</paper-item>
+            <paper-item id="Kt13k">Kt13k</paper-item>
+            <paper-item id="Kt14k">Kt14k</paper-item>
+            <paper-item id="Kt15k">Kt15k</paper-item>
+            <paper-item id="Kt16k">Kt16k</paper-item>
+            <paper-item id="Ktak">Ktak</paper-item>
+            <paper-item id="Ktbk">Ktbk</paper-item>
+            <paper-item id="Ktck">Ktck</paper-item>
+            <paper-item id="Ktdk">Ktdk</paper-item>
+            <paper-item id="Ktek">Ktek</paper-item>
+            <paper-item id="Ktfk">Ktfk</paper-item>
+            <paper-item id="Ktgk">Ktgk</paper-item>
+            <paper-item id="Kthk">Kthk</paper-item>
+            <paper-item id="Ktik">Ktik</paper-item>
+            <paper-item id="Ktkk">Ktkk</paper-item>
+            <paper-item id="Ktjk">Ktjk</paper-item>
+            <paper-item id="Ktlk">Ktlk</paper-item>
+            <paper-item id="Ktmk">Ktmk</paper-item>
+            <paper-item id="Ktnk">Ktnk</paper-item>
+            <paper-item id="Ktok">Ktok</paper-item>
+            <paper-item id="Ktpk">Ktpk</paper-item>
+            <paper-item id="Ktrk">Ktrk</paper-item>
+            <paper-item id="Ktsk">Ktsk</paper-item>
+            <paper-item id="Ktszk">Ktszk</paper-item>
+            <paper-item id="Kttk">Kttk</paper-item>
+            <paper-item id="Ktuk">Ktuk</paper-item>
+            <paper-item id="Ktvk">Ktvk</paper-item>
+            <paper-item id="Ktyk">Ktyk</paper-item>
+            <paper-item id="Ktzk">Ktzk</paper-item>
+            <paper-item id="Acemhoyuk">Acemhoyuk</paper-item>
+            <paper-item id="Adana">Adana</paper-item>
+            <paper-item id="Ashmolean">Ashmolean</paper-item>
+            <paper-item id="AMM">AMM</paper-item>
+            <paper-item id="Boehl">Boehl</paper-item>
+            <paper-item id="BritishMuseum">BritishMuseum</paper-item>
+            <paper-item id="NesrKalley">NesrKalley</paper-item>
+            <paper-item id="Chantre">Chantre</paper-item>
+            <paper-item id="Basel">Basel</paper-item>
+            <paper-item id="EthnographicAnkara">EthnographicAnkara</paper-item>
+            <paper-item id="HarvardSemMuseum">HarvardSemMuseum</paper-item>
+            <paper-item id="HilprechtJena">HilprechtJena</paper-item>
+            <paper-item id="InstitutArchLiverpool">InstitutArchLiverpool</paper-item>
+            <paper-item id="IstanbulArchMuseum">IstanbulArchMuseum</paper-item>
+            <paper-item id="KarlsuniversitatPrague">KarlsuniversitatPrague</paper-item>
+            <paper-item id="KayseriMuseum">KayseriMuseum</paper-item>
+            <paper-item id="Hattusha">Hattusha</paper-item>
+            <paper-item id="BlanckertzBerlin">BlanckertzBerlin</paper-item>
+            <paper-item id="FriedaHahnBerlin">FriedaHahnBerlin</paper-item>
+            <paper-item id="ColeLosAngeles">ColeLosAngeles</paper-item>
+            <paper-item id="MetropolitanMuseumArt">MetropolitanMuseumArt</paper-item>
+            <paper-item id="MixonCollection">MixonCollection</paper-item>
+            <paper-item id="Louvre">Louvre</paper-item>
+            <paper-item id="MusArtHistoireGeneva">MusArtHistoireGeneva</paper-item>
+            <paper-item id="NiesBabYale">NiesBabYale</paper-item>
+            <paper-item id="OrientalInstituteChicago">OrientalInstituteChicago</paper-item>
+            <paper-item id="RoyalOntarioMuseum">RoyalOntarioMuseum</paper-item>
+            <paper-item id="RoyalScottishMuseum">RoyalScottishMuseum</paper-item>
+            <paper-item id="SadbergHanimCollection">SadbergHanimCollection</paper-item>
+            <paper-item id="SchaefferTexts">SchaefferTexts</paper-item>
+            <paper-item id="StateHermitageStPetersburg">StateHermitageStPetersburg</paper-item>
+            <paper-item id="Moscow">Moscow</paper-item>
+            <paper-item id="UnivHeidelberg">UnivHeidelberg</paper-item>
+            <paper-item id="UnivPennMuseumArch">UnivPennMuseumArch</paper-item>
+            <paper-item id="Giessen">Giessen</paper-item>
+            <paper-item id="VorderasiatischeBerlin">VorderasiatischeBerlin</paper-item>
+            <paper-item id="ManchesterMuseum">ManchesterMuseum</paper-item>
+            <paper-item id="SchoyenColl">SchoyenColl</paper-item>
+            <paper-item id="HarvardArtSackler">HarvardArtSackler</paper-item>
+            <paper-item id="A">A</paper-item>
+            <paper-item id="AdonisKyrou">AdonisKyrou</paper-item>
+            <paper-item id="AnkaraNotAMM">AnkaraNotAMM</paper-item>
+            <paper-item id="Konya">Konya</paper-item>
+          </paper-listbox>
+        </paper-dropdown-menu>
+        <paper-input name="Image Number" id="imageNumber" label="Image Number" value="[[imageNumber]]"></paper-input>
+        <!-- Options obverse, reverse, -->
+      <paper-dropdown-menu label="Image View">
+        <paper-listbox class="dropdown-content" id = "imageView" attr-for-selected = 'id'>
+          <paper-item id="obv">obverse (front)</paper-item>
+          <paper-item id="lower-edge">lower edge</paper-item>
+          <paper-item id='rev'>reverse (back)</paper-item>
+          <paper-item id='ue'>upper edge</paper-item>
+          <paper-item id='left-edge'>left edge</paper-item>
+          <paper-item id='right-edge'>right edge</paper-item>
+          <paper-item id='scale'>scale</paper-item>
+          <paper-item id='glamor'>glamor</paper-item>
+          <paper-item id='other'>other</paper-item>
+        </paper-listbox>
+      </paper-dropdown-menu><br>
+      <paper-dropdown-menu label="Image Angle">
+        <paper-listbox class="dropdown-content" id="imageAngle" selected="straight" attr-for-selected = 'id'>
+          <paper-item id='straight'>straight</paper-item>
+          <paper-item id='above'>above</paper-item>
+          <paper-item id='below'>below</paper-item>
+        </paper-listbox>
+      </paper-dropdown-menu>
+      </form>
+      <vaadin-upload accept="image/*" maxFiles=1 on-upload-before="submitNewTabletImage"></vaadin-upload>
+    </paper-card>
+  </center>
+  </template>
+  <!-- <script src = "../bower_components/interact.js"></script> -->
+  <script>
+    Polymer({
+      is: 'tabletninjas-upload',
+      properties: {
+        user: {
+          type: String,
+          reflectToAttribute: true
+        },
+      },
+      ready: function() {
+      },
+      submitNewTabletImage: function(e) {
+        //Variable Declarations
+        var season = this.$.imageSeason.selected;
+        var number = this.$.imageNumber.value;
+        var view = this.$.imageView.selected;
+        var angle = this.$.imageAngle.selected;
+        var time = new Date().getTime();
+        var countPath = 'tablets/' + season + '/' + number + '/' + view + '/' + angle;
+        var tabletsPath = 'tablets/' + season + '/' + number + '/';
+        var username;
+        var count;
+
+        var getUser = this.getUser();
+        var countPromise = this.getImageCount(countPath);
+
+        getUser.then(function(data) {
+          username = data;
+          countPromise.then(function(data2) {
+            count = data2;
+            var storagePath = countPath + '/' + count;
+            var imagePath = season + '_' + number + '_' + view + '_' + angle + '_' + count
+            var storageRef = firebase.storage().ref(tabletsPath + imagePath);
+            if(typeof season && number && typeof view != 'undefined'){
+              try{
+                firebase.database().ref(storagePath).set({
+                  season: season,
+                  number: number,
+                  view:  view,
+                  angle: angle,
+                  location: imagePath,
+                  date: time,
+                  username: username
+                });
+                //save image to storage
+                storageRef.put(e.detail.file);
+              }catch(error){
+                alert('Please talk to Ben. You received error: ' + error)
+              }
+            }else{
+              alert('you have not filled out all the fields')
+            }
+          }, function(error) {
+            alert('Inform ben that Firebase Count Function failed with ' + error.message)
+          });
+        }, function(error) {
+          alert('Inform ben that Firebase User Function failed with ' + error.message)
+        });
+
+      },
+      getUser: function(){
+        return new Promise(function(resolve, reject) {
+          firebase.auth().onAuthStateChanged(function(user) {
+            if (user) {
+              resolve(user.email);
+            } else {
+              window.location = "/login"
+            }
+          });
+        })
+      },
+      getImageCount: function(countPath) {
+        return new Promise(function(resolve, reject) {
+          try{
+            firebase.database().ref(countPath).once('value').then(function(snapshot) {
+              var count = 1;
+              for(value in snapshot.val()){
+                count++;
+              }
+              resolve( count);
+            });
+          }catch(error){
+            reject(Error(error))
+          }
+        })
+      }
+
+    });
+  </script>
+</dom-module>

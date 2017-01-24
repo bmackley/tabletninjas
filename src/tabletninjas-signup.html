@@ -1,0 +1,89 @@
+<link href="../bower_components/polymer/polymer.html" rel="import">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-card/paper-card.html">
+
+<dom-module id="tabletninjas-signup">
+  <style>
+    /* CSS rules for your element */
+      :host {
+        display: block;
+      }
+      #tabletninjas-background{
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url('../images/homeTablet.jpeg') center;
+        background-size: cover;
+        color: white;
+      }
+      #signup-form{
+        width: 300px;
+        max-width: 100%;
+        height: 450px;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        margin: auto;
+        position: absolute;
+        background: black;
+        color: white;
+        --paper-card-header-color: white;
+        --paper-input-container-color: white;
+        --paper-input-container-focus-color: white;
+      }
+      .form-field{
+        --paper-input-container-focus-color: white;
+        --paper-input-container-input-color: white;
+      }
+      paper-button{
+        border-color: white;
+        border-width: 2px;
+        border-style: solid;
+        margin-top: 20px;
+      }
+      a{
+        color: inherit;
+        text-decoration: none;
+      }
+  </style>
+  <template>
+    <div id="tabletninjas-background">
+      <paper-card heading="Signup for an account" id="signup-form">
+        <div class="card-content">
+          <paper-input name="email" class=" form-field" id = "signupEmail" label="Email" required auto-validate></paper-input>
+          <paper-input name="password" class=" form-field" id = "signupPassword" label="Password" type="password" required auto-validate></paper-input>
+          <paper-input name="verify password" class=" form-field" id = "verifiedSignupPassword" label="Verify Password" type="password" required auto-validate></paper-input>
+          <paper-input name="school" class=" form-field" id = "signupSchool" label="School" required auto-validate></paper-input>
+          <paper-button on-click="signupSubmit">Submit</paper-button>
+          <a href="/home"><paper-button>Cancel</paper-button></a>
+          <p>Already have an account? <a href="/login">Login<href>
+        </div>
+      </paper-card>
+    </div>
+
+  </template>
+  <script>
+    Polymer({
+      is: 'tabletninjas-signup',
+      signupSubmit: function() {
+        const email = this.$.signupEmail.value
+        console.log(email)
+        const password = this.$.signupPassword.value
+        // var ref = new Firebase("https://prendus.firebaseio.com/");
+        //This returns a promise.  Learn how to work with promises to figure out how to get this to fire automatically.
+        firebase.auth().createUserWithEmailAndPassword(email, password).catch(function(error) {
+          // Handle Errors here.
+          var errorCode = error.code;
+          var errorMessage = error.message;
+          console.log(errorMessage)
+        });
+        console.log('success!')
+      },
+    });
+  </script>
+</dom-module>
