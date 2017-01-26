@@ -1,10 +1,9 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
-<!-- <link rel="import" href="../bower_components/iron-form/iron-form.html"> -->
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../bower_components/iron-icons/iron-icons.html">
 <link rel="import" href="../bower_components/iron-icon/iron-icon.html">
-<!-- <link rel="import" href="tabletninjas-login.html"> -->
+<link rel="import" href="tabletninjas-header.html">
 <link rel="import" href="shared-styles.html">
 
 <dom-module id="tabletninjas-tag">
@@ -56,6 +55,7 @@
 
   </style>
   <template>
+    <tabletninjas-header></tabletninjas-header>
     <div>
       <img id ='Tablet' src ="../images/KUG03-obv-01.jpg">
     </div>
@@ -63,7 +63,7 @@
       <center><div class ="black-background" id><iron-icon class = "big" icon="arrow-back"></iron-icon><span style="color:white">Line 1</span><iron-icon class = "big" icon="arrow-forward"></iron-icon></div></center>
       <div id = "signs">
         <span id = "signs-scroll">
-          <img src ="../images/signs/001.png">
+          <img src ="../images/signs/001.png" class = 'resize'>
           <img src ="../images/signs/002a.png">
           <img src ="../images/signs/001.png">
           <img src ="../images/signs/002a.png">
@@ -77,7 +77,10 @@
       </div>
     </div>
   </template>
-  <!-- <script src = "../bower_components/interact.js"></script> -->
+  <script src = "../bower_components/interactjs/interact.js"></script>
+  <script>
+
+  </script>
   <script>
     Polymer({
       is: 'tabletninjas-tag',
@@ -85,7 +88,49 @@
         username: String
       },
       ready: function() {
+        firebase.auth().onAuthStateChanged(function(user) {
+          if (!user) {
+            //change this to profile once the profile page is created.
+            window.location = "/login"
+          }
+        });
+        //Custom
+        var signs = this.shadowRoot.querySelector('#signs-scroll')
+        var tabletDropArea = this.shadowRoot.querySelector('#Tablet')
+        console.log(tabletDropArea)
+        console.log(signs)
+        interact('img', {
+          context: signs,
+        })
+        .draggable({
+          snap: {
+            targets: [
+              { tabletDropArea }
+          ]},
+          onmove: dragMoveListener,
+        });
+        //Dont need to clone because users get all of the signs they need (it will be going one by one)
+        //Need to figure out how to clone for the more advanced ones
+        function dragMoveListener(event){
+          var target = event.target,
+          // keep the dragged position in the data-x/data-y attributes
+          x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx,
+          y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
 
+          target.style.webkitTransform =
+          target.style.transform =
+            'translate(' + x + 'px, ' + y + 'px)';
+
+          // update the posiion attributes
+          target.setAttribute('data-x', x);
+          target.setAttribute('data-y', y);
+        }
+        interact(tabletDropArea).dropzone({
+          accept: '.resize',
+          ondragenter: function (event) {
+            console.log('drag enter')
+          },
+        });
       }
     });
   </script>

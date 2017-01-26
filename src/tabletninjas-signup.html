@@ -70,6 +70,14 @@
   <script>
     Polymer({
       is: 'tabletninjas-signup',
+      ready: function(){
+        firebase.auth().onAuthStateChanged(function(user) {
+          if (user) {
+            //change this to profile once the profile page is created.
+            window.location = "/tag"
+          }
+        });
+      },
       signupSubmit: function() {
         const email = this.$.signupEmail.value
         console.log(email)
