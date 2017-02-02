@@ -18,6 +18,10 @@
     }*/
     #Tablet{
       width: 100%;
+      position: absolute;
+    }
+    #imageArea{
+      position: relative;
     }
     #footer-container {
       width: 100%;
@@ -41,8 +45,9 @@
       display: inline-block;
       /*maybe figure out a way to get the images on the same line and to scroll?*/
     }
-    #line-title{
-      width:
+    .graph {
+      background-color: orange;
+      display: block;
     }
     .big{
       --iron-icon-fill-color: white;
@@ -56,29 +61,39 @@
   </style>
   <template>
     <tabletninjas-header></tabletninjas-header>
-    <div>
-      <img id ='Tablet' src ="../images/KUG03-obv-01.jpg">
+    <div id = "imageArea">
+      <img id ='Tablet' class = "hbwrap droppable" src ="../images/KUG03-obv-01.jpg">
     </div>
     <div id = "footer-container">
       <center><div class ="black-background" id><iron-icon class = "big" icon="arrow-back"></iron-icon><span style="color:white">Line 1</span><iron-icon class = "big" icon="arrow-forward"></iron-icon></div></center>
       <div id = "signs">
         <span id = "signs-scroll">
-          <img src ="../images/signs/001.png" class = 'resize'>
-          <img src ="../images/signs/002a.png">
-          <img src ="../images/signs/001.png">
-          <img src ="../images/signs/002a.png">
-          <img src ="../images/signs/001.png">
-          <img src ="../images/signs/002a.png">
-          <img src ="../images/signs/001.png">
-          <img src ="../images/signs/001.png">
-          <img src ="../images/signs/001.png">
-          <img src ="../images/signs/001.png">
+          <img src ="../images/signs/001.png" id="one" data-sign='001'>
+          <img src ="../images/signs/002a.png" id="two" data-sign='002a'>
+          <img src ="../images/signs/001.png" id="three" data-sign='001'>
+          <img src ="../images/signs/002a.png" id="four" data-sign='002a'>
+          <img src ="../images/signs/001.png" id="five" data-sign='001'>
+          <img src ="../images/signs/002a.png" id="six" data-sign='002a'>
+          <img src ="../images/signs/001.png" id="seven" data-sign='001'>
+          <img src ="../images/signs/001.png" id="eight" data-sign='001'>
+          <img src ="../images/signs/001.png" id="nine" data-sign='001'>
+          <img src ="../images/signs/001.png" id="ten" data-sign='001'>
         </span>
       </div>
     </div>
   </template>
-  <script src = "../bower_components/interactjs/interact.js"></script>
-  <script>
+  <!-- <script src = "../bower_components/interactjs/interact.js"></script> -->
+  <script
+    src="https://code.jquery.com/jquery-3.1.1.js"
+    integrity="sha256-16cdPddA6VdVInumRGo6IbivbERE8p7CQR3HzTBuELA="
+    crossorigin="anonymous">
+  </script>
+  <script
+  src="http://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
+  integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU="
+  crossorigin="anonymous">
+  </script>
+  <!-- <script src = "tag-hotspots.js"> -->
 
   </script>
   <script>
@@ -95,43 +110,83 @@
           }
         });
         //Custom
-        var signs = this.shadowRoot.querySelector('#signs-scroll')
-        var tabletDropArea = this.shadowRoot.querySelector('#Tablet')
-        console.log(tabletDropArea)
-        console.log(signs)
-        interact('img', {
-          context: signs,
-        })
-        .draggable({
-          snap: {
-            targets: [
-              { tabletDropArea }
-          ]},
-          onmove: dragMoveListener,
-        });
-        //Dont need to clone because users get all of the signs they need (it will be going one by one)
-        //Need to figure out how to clone for the more advanced ones
-        function dragMoveListener(event){
-          var target = event.target,
-          // keep the dragged position in the data-x/data-y attributes
-          x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx,
-          y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
-
-          target.style.webkitTransform =
-          target.style.transform =
-            'translate(' + x + 'px, ' + y + 'px)';
-
-          // update the posiion attributes
-          target.setAttribute('data-x', x);
-          target.setAttribute('data-y', y);
+        //Set up a Rectangle spot
+        var tabletDropArea = this.root.querySelector('#Tablet')
+        var hotspotArray = new Array();
+        var hotspot = function(id, left, top, width, height, sign){
+          this.id = id;
+          this.x = left;
+          this.y = top;
+          this.width = width;
+          this.height = height;
+          this.html = "<img src='../images/signs/" + sign + ".png' id = '"+ 'one' + "' class='graph'>"//get the correct ID from Firebase
         }
-        interact(tabletDropArea).dropzone({
-          accept: '.resize',
-          ondragenter: function (event) {
-            console.log('drag enter')
-          },
+        var self = this;
+        hotspot.prototype.attachHotspot = function(){
+          console.log('this', this)
+          //var image = self.shadowRoot.querySelector('.black-background').innerHTML('<h1 style="background-color: white;">Hello World</h1>');
+          var imageAreaDrop = self.shadowRoot.querySelector('#imageArea');
+          $(imageAreaDrop).append(this.html)
+          var attachedGraph = self.shadowRoot.querySelector("#one");
+          console.log('attached graph', attachedGraph);
+          console.log('this', self)
+          console.log('tabletDrop width', tabletDropArea.width)
+          $(attachedGraph).css({"left" : (this.x * tabletDropArea.width), "background-color" : "orange"})
+        }
+
+
+        //Add draggable class to all signs
+        var nodes = this.root.querySelector('#signs-scroll').childNodes
+
+        for (i = 0; i < nodes.length; i++){
+          if (nodes[i].nodeName.toLowerCase() == 'img') {
+          $(nodes[i]).draggable({
+            start: function () {
+              Positioning.initialize($(this));
+            },
+            helper: 'clone',
+            revert: "valid",
+            revertDuration: 0,
+            });
+           }
+        }
+
+
+
+        $(tabletDropArea).droppable({
+          drop: function( event, ui ) {
+            var currentDraggable = $(ui.draggable)[0];
+            console.log(currentDraggable.dataset.sign)
+            //Calculate position
+            var signDataPoints = calculateSignPercentages(currentDraggable.x, tabletDropArea.x, currentDraggable.y, tabletDropArea.y, currentDraggable.width, tabletDropArea.width, currentDraggable.height, tabletDropArea.height)
+            newHotspot = new hotspot((hotspotArray.length + 1), signDataPoints.left, signDataPoints.top, signDataPoints.width, signDataPoints.height, currentDraggable.dataset.sign);
+            hotspotArray.push(newHotspot);//set position and height of image
+            newHotspot.attachHotspot()
+            console.log(hotspotArray)
+          }
         });
-      }
-    });
+        var Positioning = (function () {
+            return {
+                //Initializes the starting coordinates of the object
+                initialize: function (object) {
+                    object.data("originalLocation", $(this).originalPosition = { top: 0, left: 0 });
+                },
+                //Resets the object to its starting coordinates
+                reset: function (object) {
+                    object.data("originalLocation").originalPosition = { top: 0, left: 0 };
+                },
+            };//return
+        })();//Positioning
+
+        var calculateSignPercentages = function(uix, tabletx, uiy, tablety, uiwidth, tabletwidth, uiheight, tabletheight){
+          return {
+            left: ((uix - tabletx)/tabletwidth),
+            top: ((uiy - tablety)/tabletheight),
+            width: (uiwidth/tabletwidth),
+            height: (uiheight/tabletheight),
+          }
+        } //calculateSignPercentages
+      }//Ready
+    });//Polymer
   </script>
 </dom-module>
