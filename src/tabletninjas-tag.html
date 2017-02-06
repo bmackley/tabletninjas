@@ -1,10 +1,9 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
-<!-- <link rel="import" href="../bower_components/iron-form/iron-form.html"> -->
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../bower_components/iron-icons/iron-icons.html">
 <link rel="import" href="../bower_components/iron-icon/iron-icon.html">
-<!-- <link rel="import" href="tabletninjas-login.html"> -->
+<link rel="import" href="tabletninjas-header.html">
 <link rel="import" href="shared-styles.html">
 
 <dom-module id="tabletninjas-tag">
@@ -19,6 +18,10 @@
     }*/
     #Tablet{
       width: 100%;
+      position: absolute;
+    }
+    #imageArea{
+      position: relative;
     }
     #footer-container {
       width: 100%;
@@ -42,8 +45,9 @@
       display: inline-block;
       /*maybe figure out a way to get the images on the same line and to scroll?*/
     }
-    #line-title{
-      width:
+    .graph {
+      background-color: orange;
+      display: block;
     }
     .big{
       --iron-icon-fill-color: white;
@@ -56,28 +60,42 @@
 
   </style>
   <template>
-    <div>
-      <img id ='Tablet' src ="../images/KUG03-obv-01.jpg">
+    <tabletninjas-header></tabletninjas-header>
+    <div id = "imageArea">
+      <img id ='Tablet' class = "hbwrap droppable" src ="../images/KUG03-obv-01.jpg">
     </div>
     <div id = "footer-container">
       <center><div class ="black-background" id><iron-icon class = "big" icon="arrow-back"></iron-icon><span style="color:white">Line 1</span><iron-icon class = "big" icon="arrow-forward"></iron-icon></div></center>
       <div id = "signs">
         <span id = "signs-scroll">
-          <img src ="../images/signs/001.png">
-          <img src ="../images/signs/002a.png">
-          <img src ="../images/signs/001.png">
-          <img src ="../images/signs/002a.png">
-          <img src ="../images/signs/001.png">
-          <img src ="../images/signs/002a.png">
-          <img src ="../images/signs/001.png">
-          <img src ="../images/signs/001.png">
-          <img src ="../images/signs/001.png">
-          <img src ="../images/signs/001.png">
+          <img src ="../images/signs/001.png" id="one" data-sign='001'>
+          <img src ="../images/signs/002a.png" id="two" data-sign='002a'>
+          <img src ="../images/signs/001.png" id="three" data-sign='001'>
+          <img src ="../images/signs/002a.png" id="four" data-sign='002a'>
+          <img src ="../images/signs/001.png" id="five" data-sign='001'>
+          <img src ="../images/signs/002a.png" id="six" data-sign='002a'>
+          <img src ="../images/signs/001.png" id="seven" data-sign='001'>
+          <img src ="../images/signs/001.png" id="eight" data-sign='001'>
+          <img src ="../images/signs/001.png" id="nine" data-sign='001'>
+          <img src ="../images/signs/001.png" id="ten" data-sign='001'>
         </span>
       </div>
     </div>
   </template>
-  <!-- <script src = "../bower_components/interact.js"></script> -->
+  <!-- <script src = "../bower_components/interactjs/interact.js"></script> -->
+  <script
+    src="https://code.jquery.com/jquery-3.1.1.js"
+    integrity="sha256-16cdPddA6VdVInumRGo6IbivbERE8p7CQR3HzTBuELA="
+    crossorigin="anonymous">
+  </script>
+  <script
+  src="http://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
+  integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU="
+  crossorigin="anonymous">
+  </script>
+  <!-- <script src = "tag-hotspots.js"> -->
+
+  </script>
   <script>
     Polymer({
       is: 'tabletninjas-tag',
@@ -85,8 +103,88 @@
         username: String
       },
       ready: function() {
+        firebase.auth().onAuthStateChanged(function(user) {
+          if (!user) {
+            //change this to profile once the profile page is created.
+            window.location = "/login"
+          }
+        });
+        //Custom
+        //GLOBAL VARIABLES
+        var self = this;
 
-      }
-    });
+        $(this.root.querySelector('#Tablet')).on('load', function(){
+          var height = $(this).css('height')
+          var footerHeight = self.root.querySelector('#footer-container').offsetHeight;
+          $(self.shadowRoot.querySelector('#imageArea')).css({'height': height, 'margin-bottom': footerHeight});
+        })
+
+        //Set up a Rectangle spot
+        var tabletDropArea = this.root.querySelector('#Tablet')
+        var hotspotArray = new Array();
+        var hotspot = function(id, left, top, width, height, sign){
+          this.id = id;
+          this.x = left;
+          this.y = top;
+          this.width = width;
+          this.height = height;
+          this.html = "<img src='../images/signs/" + sign + ".png' id = '"+ 'one' + "' class='graph'>"//get the correct ID from Firebase
+        }
+        hotspot.prototype.attachHotspot = function(){
+          var tablet = self.shadowRoot.querySelector('#Tablet');
+          var left = (this.x) * 100;
+          var top = (this.y) * 100;
+          var width = tablet.width * this.width;
+          var height = tablet.height * this.height;
+          var attachedGraph = $(this.html).clone();
+          var imageAreaDrop = self.shadowRoot.querySelector('#imageArea');
+          var imageHTML = '<img style="background-color: black; position: absolute; left:'+ left+ '%; top:'+ top+ '%; width:'+ width+ 'px; height:'+ height+ 'px;" src="'+ attachedGraph[0].src +'">';
+          $(imageAreaDrop).append(imageHTML)
+          //TO DO: RESIZE THE HOTSPOTS ON A WINDOW RESIZE
+        }
+
+        //make each of the signs draggable
+        var nodes = this.root.querySelector('#signs-scroll').childNodes
+        for (i = 0; i < nodes.length; i++){
+          if (nodes[i].nodeName.toLowerCase() == 'img') {
+            $(nodes[i]).draggable({
+              helper: 'clone',
+            });
+           }
+        }
+
+        $(tabletDropArea).droppable({
+          drop: function( event, ui ) {
+            var currentDraggable = $(ui.helper)[0];
+            console.log('current', currentDraggable)
+            //Calculate position
+            var signDataPoints = calculateSignPercentages($(currentDraggable).offset().left, $(tabletDropArea).offset().left, $(currentDraggable).offset().top, $(tabletDropArea).offset().top, currentDraggable.width, tabletDropArea.width, currentDraggable.height, tabletDropArea.height)
+            var firebaseHotspot = saveHotspot(signDataPoints.left, signDataPoints.top, signDataPoints.width, signDataPoints.height, currentDraggable.dataset.sign)
+            newHotspot = new hotspot((hotspotArray.length + 1), signDataPoints.left, signDataPoints.top, signDataPoints.width, signDataPoints.height, currentDraggable.dataset.sign);
+            hotspotArray.push(newHotspot);//set position and height of image
+            newHotspot.attachHotspot()
+          }
+        });
+
+        var calculateSignPercentages = function(uix, tabletx, uiy, tablety, uiwidth, tabletwidth, uiheight, tabletheight){
+          return {
+            left: ((uix - tabletx)/(tabletwidth - tabletx)),
+            top: ((uiy - tablety)/(tabletheight - tablety)),
+            width: (uiwidth/tabletwidth),
+            height: (uiheight/tabletheight),
+          }
+        } //calculateSignPercentages
+        var saveHotspot = function(left, top, width, height, sign){
+          console.log('in the save hotspot')
+          firebase.database().ref('hotspot').push({
+              left: left,
+              top: top,
+              width: width,
+              height: height,
+              sign: sign
+          });
+        }
+      }//Ready
+    });//Polymer
   </script>
 </dom-module>

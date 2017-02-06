@@ -82,9 +82,8 @@
       ready: function(){
         firebase.auth().onAuthStateChanged(function(user) {
           if (user) {
-            alert('you are already logged in')
-          } else {
-            // No user is signed in.
+            //change this to profile once the profile page is created.
+            window.location = "/upload"
           }
         });
       },
