@@ -110,6 +110,15 @@
           }
         });
         //Custom
+        //GLOBAL VARIABLES
+        var self = this;
+
+        $(this.root.querySelector('#Tablet')).on('load', function(){
+          var height = $(this).css('height')
+          var footerHeight = self.root.querySelector('#footer-container').offsetHeight;
+          $(self.shadowRoot.querySelector('#imageArea')).css({'height': height, 'margin-bottom': footerHeight});
+        })
+
         //Set up a Rectangle spot
         var tabletDropArea = this.root.querySelector('#Tablet')
         var hotspotArray = new Array();
@@ -121,71 +130,60 @@
           this.height = height;
           this.html = "<img src='../images/signs/" + sign + ".png' id = '"+ 'one' + "' class='graph'>"//get the correct ID from Firebase
         }
-        var self = this;
         hotspot.prototype.attachHotspot = function(){
-          console.log('this', this)
-          //var image = self.shadowRoot.querySelector('.black-background').innerHTML('<h1 style="background-color: white;">Hello World</h1>');
+          var tablet = self.shadowRoot.querySelector('#Tablet');
+          var left = (this.x) * 100;
+          var top = (this.y) * 100;
+          var width = tablet.width * this.width;
+          var height = tablet.height * this.height;
+          var attachedGraph = $(this.html).clone();
           var imageAreaDrop = self.shadowRoot.querySelector('#imageArea');
-          $(imageAreaDrop).append(this.html)
-          var attachedGraph = self.shadowRoot.querySelector("#one");
-          console.log('attached graph', attachedGraph);
-          console.log('this', self)
-          console.log('tabletDrop width', tabletDropArea.width)
-          $(attachedGraph).css({"left" : (this.x * tabletDropArea.width), "background-color" : "orange"})
+          var imageHTML = '<img style="background-color: black; position: absolute; left:'+ left+ '%; top:'+ top+ '%; width:'+ width+ 'px; height:'+ height+ 'px;" src="'+ attachedGraph[0].src +'">';
+          $(imageAreaDrop).append(imageHTML)
+          //TO DO: RESIZE THE HOTSPOTS ON A WINDOW RESIZE
         }
 
-
-        //Add draggable class to all signs
+        //make each of the signs draggable
         var nodes = this.root.querySelector('#signs-scroll').childNodes
-
         for (i = 0; i < nodes.length; i++){
           if (nodes[i].nodeName.toLowerCase() == 'img') {
-          $(nodes[i]).draggable({
-            start: function () {
-              Positioning.initialize($(this));
-            },
-            helper: 'clone',
-            revert: "valid",
-            revertDuration: 0,
+            $(nodes[i]).draggable({
+              helper: 'clone',
             });
            }
         }
 
-
-
         $(tabletDropArea).droppable({
           drop: function( event, ui ) {
-            var currentDraggable = $(ui.draggable)[0];
-            console.log(currentDraggable.dataset.sign)
+            var currentDraggable = $(ui.helper)[0];
+            console.log('current', currentDraggable)
             //Calculate position
-            var signDataPoints = calculateSignPercentages(currentDraggable.x, tabletDropArea.x, currentDraggable.y, tabletDropArea.y, currentDraggable.width, tabletDropArea.width, currentDraggable.height, tabletDropArea.height)
+            var signDataPoints = calculateSignPercentages($(currentDraggable).offset().left, $(tabletDropArea).offset().left, $(currentDraggable).offset().top, $(tabletDropArea).offset().top, currentDraggable.width, tabletDropArea.width, currentDraggable.height, tabletDropArea.height)
+            var firebaseHotspot = saveHotspot(signDataPoints.left, signDataPoints.top, signDataPoints.width, signDataPoints.height, currentDraggable.dataset.sign)
             newHotspot = new hotspot((hotspotArray.length + 1), signDataPoints.left, signDataPoints.top, signDataPoints.width, signDataPoints.height, currentDraggable.dataset.sign);
             hotspotArray.push(newHotspot);//set position and height of image
             newHotspot.attachHotspot()
-            console.log(hotspotArray)
           }
         });
-        var Positioning = (function () {
-            return {
-                //Initializes the starting coordinates of the object
-                initialize: function (object) {
-                    object.data("originalLocation", $(this).originalPosition = { top: 0, left: 0 });
-                },
-                //Resets the object to its starting coordinates
-                reset: function (object) {
-                    object.data("originalLocation").originalPosition = { top: 0, left: 0 };
-                },
-            };//return
-        })();//Positioning
 
         var calculateSignPercentages = function(uix, tabletx, uiy, tablety, uiwidth, tabletwidth, uiheight, tabletheight){
           return {
-            left: ((uix - tabletx)/tabletwidth),
-            top: ((uiy - tablety)/tabletheight),
+            left: ((uix - tabletx)/(tabletwidth - tabletx)),
+            top: ((uiy - tablety)/(tabletheight - tablety)),
             width: (uiwidth/tabletwidth),
             height: (uiheight/tabletheight),
           }
         } //calculateSignPercentages
+        var saveHotspot = function(left, top, width, height, sign){
+          console.log('in the save hotspot')
+          firebase.database().ref('hotspot').push({
+              left: left,
+              top: top,
+              width: width,
+              height: height,
+              sign: sign
+          });
+        }
       }//Ready
     });//Polymer
   </script>
