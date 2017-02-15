@@ -62,7 +62,8 @@
   <template>
     <tabletninjas-header></tabletninjas-header>
     <div id = "imageArea">
-      <img id ='Tablet' class = "hbwrap droppable" src ="../images/KUG03-obv-01.jpg">
+      <img id ='Tablet' class = "hbwrap droppable">
+      <!-- src ="../images/KUG03-obv-01.jpg" -->
     </div>
     <div id = "footer-container">
       <center><div class ="black-background" id><iron-icon class = "big" icon="arrow-back"></iron-icon><span style="color:white">Line 1</span><iron-icon class = "big" icon="arrow-forward"></iron-icon></div></center>
@@ -109,20 +110,176 @@
             window.location = "/login"
           }
         });
+        var user = firebase.auth().currentUser;
         //Custom
         //GLOBAL VARIABLES
         var self = this;
+        var tabletDropArea = this.root.querySelector('#Tablet')
+        var tabletID, tabletSeason, tabletNumber, tabletView, tabletAngle;
+        var hotspotArray = [];
 
         $(this.root.querySelector('#Tablet')).on('load', function(){
           var height = $(this).css('height')
           var footerHeight = self.root.querySelector('#footer-container').offsetHeight;
           $(self.shadowRoot.querySelector('#imageArea')).css({'height': height, 'margin-bottom': footerHeight});
+          //var tabletHotspots = getHotspots();
+          // tabletHotspots.then(function(data) {
+          //   for (var key in data) {
+          //      if (data.hasOwnProperty(key)) {
+          //         var obj = data[key];
+          //         newHotspot = new hotspot((hotspotArray.length + 1), obj.left, obj.top, obj.width, obj.height, obj.sign);
+          //         hotspotArray.push(newHotspot);//set position and height of image
+          //         newHotspot.attachHotspot()
+          //      }
+          //   }
+          // })
         })
 
+        function getHotspots() {
+          return new Promise(function(resolve, reject) {
+            try{
+              var tabletHotspots = 'tablets/' + tabletSeason + '/' + tabletNumber + '/' + tabletView + '/' + tabletAngle + '/hotspots'
+              firebase.database().ref('hotspotPath').once('value').then(function(snapshot) {
+                resolve(snapshot.val());
+              });
+            }catch(error){
+              reject(Error(error))
+            }
+          })
+        }
+        var tabletImagePath = getTabletImagePath();
+
+        function getTabletImagePath() {
+          return new Promise(function(resolve, reject) {
+            try{
+              firebase.database().ref('tablets/Kt94k').orderByKey().limitToFirst(1).once('value').then(function(snapshot) {
+                var path = getTabletImagePathChildInfo(snapshot);
+                resolve(path);
+              });
+            }catch(error){
+              reject(Error(error))
+            }
+          })
+        }
+        tabletImagePath.then(function(data) {
+
+            ///////////?THIS NEEDS TO GO IN A DEFFERRED
+          //change this once we get to Production
+          var pathReference = firebase.storage().ref(data.path);
+          pathReference.getDownloadURL().then(function(url){
+            var img = self.root.querySelector('#Tablet');
+            img.src = url;
+          }).catch(function(error){
+            console.log('error', error)
+          })
+        })
+        function getTabletImagePathChildInfo(snapshot){
+          return new Promise(function(resolve, reject) {
+            try{
+              snapshot.forEach(function(childSnapshot) {
+                if(childSnapshot.hasChild('hasLines')){
+                  console.log('has lines has fired!')
+                }
+                loc = '';
+                var path = childSnapshot.key;
+                var found = false;
+                var hasLines = false;
+                var i = 0;
+                found === false
+                while(found === false){
+                  checkChildren(snapshot.child(path).val());
+                }
+                function checkChildren(obj){
+                  for(child in obj){
+                    if(obj.hasOwnProperty('lines')){
+                      hasLines = true;
+                    }
+                    if(obj.hasOwnProperty('location')){
+                      loc = obj['location']
+                      tabletNumber = obj['number']
+                      tabletSeason = obj['season']
+                      tabletView = obj['view']
+                      tabletAngle = obj['angle']
+                      found = true;
+                    }
+                    path = path + '/' + child ;
+                    return child;
+                  }
+                }
+                if(hasLines){
+                  console.log('yes indeed there are lines')
+                  var fullPath = 'tablets/Kt94k' + '/' + tabletNumber + '/' + loc;
+                  resolve({acceptImage: true, path: fullPath});
+                }else{
+                  var fullPath = 'tablets/Kt94k' + '/' + tabletNumber + '/' + loc;
+                  resolve({acceptImage: false, key: childSnapshot.key, path: fullPath});
+                  //return(childSnapshot.key)
+                }
+              });
+            }catch(error){
+              reject(Error(error))
+            }
+          })
+        }
+        function getTabletImagePathWithStartingIndex(index) {
+          return new Promise(function(resolve, reject){
+            try{
+              firebase.database().ref('tablets/Kt94k').orderByKey().startAt(index).limitToFirst(2).once('value').then(function(snapshot) {
+                snapshot.forEach(function(childSnapshot) {
+                  if(childSnapshot.key != index)
+                    loc = '';
+                    var path = childSnapshot.key;
+                    var found = false;
+                    var hasLines = false;
+                    var i = 0;
+                    found === false
+                    while(found === false){
+                      checkChildren(snapshot.child(path).val());
+                    }
+                    function checkChildren(obj){
+                      for(child in obj){
+                        if(obj.hasOwnProperty('lines')){
+                          hasLines = true;
+                        }
+                        if(obj.hasOwnProperty('location')){
+                          loc = obj['location']
+                          tabletNumber = obj['number']
+                          tabletSeason = obj['season']
+                          tabletView = obj['view']
+                          tabletAngle = obj['angle']
+                          found = true;
+                        }
+                        path = path + '/' + child ;
+                        return child;
+                      }
+                    }
+                    if(hasLines){
+                      var fullPath = 'tablets/Kt94k' + '/' + tabletNumber + '/' + loc;
+                      //resolve({acceptImage: true, path: fullPath});
+                      resolve(fullPath);
+                    }else{
+                      getTabletImagePathWithStartingIndex(path)
+                      .then(function(){
+                        var fullPath = 'tablets/Kt94k' + '/' + tabletNumber + '/' + loc;
+                        resolve(fullPath);
+                      });
+                      // var fullPath = 'tablets/Kt94k' + '/' + tabletNumber + '/' + loc;
+                      // resolve({acceptImage: false, key: childSnapshot.key, path: fullPath});
+                      //return(childSnapshot.key)
+                    }
+                })
+                //resolve('nothing yet');
+              });
+            }catch(error){
+              reject(Error(error))
+            }
+          });
+        }
+
         //Set up a Rectangle spot
-        var tabletDropArea = this.root.querySelector('#Tablet')
-        var hotspotArray = new Array();
-        var hotspot = function(id, left, top, width, height, sign){
+
+        function hotspot (id, left, top, width, height, sign){
+          console.log('hotspot function')
           this.id = id;
           this.x = left;
           this.y = top;
@@ -155,8 +312,8 @@
 
         $(tabletDropArea).droppable({
           drop: function( event, ui ) {
+            console.log('tablet drop')
             var currentDraggable = $(ui.helper)[0];
-            console.log('current', currentDraggable)
             //Calculate position
             var signDataPoints = calculateSignPercentages($(currentDraggable).offset().left, $(tabletDropArea).offset().left, $(currentDraggable).offset().top, $(tabletDropArea).offset().top, currentDraggable.width, tabletDropArea.width, currentDraggable.height, tabletDropArea.height)
             var firebaseHotspot = saveHotspot(signDataPoints.left, signDataPoints.top, signDataPoints.width, signDataPoints.height, currentDraggable.dataset.sign)
@@ -166,7 +323,8 @@
           }
         });
 
-        var calculateSignPercentages = function(uix, tabletx, uiy, tablety, uiwidth, tabletwidth, uiheight, tabletheight){
+        function calculateSignPercentages(uix, tabletx, uiy, tablety, uiwidth, tabletwidth, uiheight, tabletheight){
+          console.log('calc sign percentages')
           return {
             left: ((uix - tabletx)/(tabletwidth - tabletx)),
             top: ((uiy - tablety)/(tabletheight - tablety)),
@@ -174,16 +332,23 @@
             height: (uiheight/tabletheight),
           }
         } //calculateSignPercentages
-        var saveHotspot = function(left, top, width, height, sign){
-          console.log('in the save hotspot')
-          firebase.database().ref('hotspot').push({
-              left: left,
-              top: top,
-              width: width,
-              height: height,
-              sign: sign
-          });
-        }
+        function saveHotspot (left, top, width, height, sign){
+          console.log('saveHotspot')
+          var hotspotPath = tabletSeason + '/' + tabletNumber + '/' + tabletView + '/' + tabletAngle;
+          var date = new Date().getTime();
+          var hotspotData = {
+            left,
+            top,
+            width,
+            height,
+            sign,
+            date,
+          }
+          var hotspotCopy = hotspotData
+          firebase.database().ref('tablets/' + hotspotPath + '/hotspots').push(hotspotData);
+          firebase.database().ref('users/'+ user.uid + '/hotspots/' + hotspotPath).push(hotspotCopy)
+        }//saveHotspot
+
       }//Ready
     });//Polymer
   </script>
