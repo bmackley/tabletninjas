@@ -174,20 +174,21 @@
         });
         var lineData = getLines();
         lineData.then(function(data){
+          console.log()
           for(obj in data){
-            console.log('obj', obj)
-            if(obj > 5){
+            console.log('obj', data[obj])
+            if(obj > 50){
               return;
             }
-            console.log('obj uuid', data[obj].UUID)
-            console.log('obj', data[obj])
-            console.log('obj name', data[obj].Name)
-            console.log('obj number', data[obj].Number)
-            console.log('obj Position', data[obj].Position)
-            console.log('obj season', data[obj].Season)
-            console.log('obj line', data[obj].line)
-            console.log('obj sign', data[obj].Sign)
-            console.log('obj view', data[obj].Side)
+            // console.log('obj uuid', data[obj].UUID)
+            // console.log('obj', data[obj])
+            // console.log('obj name', data[obj].Name)
+            // console.log('obj number', data[obj].Number)
+            // console.log('obj Position', data[obj].Position)
+            // console.log('obj season', data[obj].Season)
+            // console.log('obj line', data[obj].line)
+            // console.log('obj sign', data[obj].Sign)
+            // console.log('obj view', data[obj].Side)
 
             var name = data[obj].Name;
             var uuid = data[obj].UUID;
@@ -197,12 +198,23 @@
             var line = data[obj].line;
             var sign = data[obj].Sign;
             var view = data[obj].Side;
-            var lineData = {
-              sign,
-              name,
-              uuid
+            var signData = {
+              'name': name,
+              'uuid': uuid,
+              'number': number,
+              'position': position,
+              'season': season,
+              'line': line,
+              'sign': sign,
+              'view': view
             }
-            firebase.database().ref('tablets/'+ season + '/' + number + '/hasLines').set(true)
+            var lineData = {
+              'sign': sign,
+              'name': name,
+              'uuid': uuid,
+            }
+            console.log('data', signData)
+            firebase.database().ref('signs/'+ season + number).push(signData).key
             firebase.database().ref('tablets/'+ season + '/' + number + '/' + view + '/lines/' + line + '/' + position ).set(lineData)
           }
         })
@@ -210,7 +222,8 @@
           console.log('in the line dat')
           return new Promise(function(resolve, reject) {
             try{
-              firebase.database().ref('identified_characters').once('value').then(function(snapshot) {
+              firebase.database().ref('identified_characters').orderByKey().limitToFirst(5).once('value').then(function(snapshot) {
+              //firebase.database().ref('identified_characters').once('value').then(function(snapshot) {
                 resolve(snapshot.val());
               });
             }catch(error){

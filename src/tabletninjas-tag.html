@@ -337,12 +337,12 @@
           var hotspotPath = tabletSeason + '/' + tabletNumber + '/' + tabletView + '/' + tabletAngle;
           var date = new Date().getTime();
           var hotspotData = {
-            left,
-            top,
-            width,
-            height,
-            sign,
-            date,
+            'left': left,
+            'top': top,
+            'width': width,
+            'height': height,
+            'sign': sign,
+            'date': date,
           }
           var hotspotCopy = hotspotData
           firebase.database().ref('tablets/' + hotspotPath + '/hotspots').push(hotspotData);
