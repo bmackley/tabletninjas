@@ -174,12 +174,8 @@
         });
         var lineData = getLines();
         lineData.then(function(data){
-          console.log()
           for(obj in data){
             console.log('obj', data[obj])
-            if(obj > 50){
-              return;
-            }
             // console.log('obj uuid', data[obj].UUID)
             // console.log('obj', data[obj])
             // console.log('obj name', data[obj].Name)
@@ -189,7 +185,6 @@
             // console.log('obj line', data[obj].line)
             // console.log('obj sign', data[obj].Sign)
             // console.log('obj view', data[obj].Side)
-
             var name = data[obj].Name;
             var uuid = data[obj].UUID;
             var number = data[obj].Number;
@@ -214,15 +209,27 @@
               'uuid': uuid,
             }
             console.log('data', signData)
-            firebase.database().ref('signs/'+ season + number).push(signData).key
-            firebase.database().ref('tablets/'+ season + '/' + number + '/' + view + '/lines/' + line + '/' + position ).set(lineData)
+            setSigns(signData, lineData)
+            // firebase.database().ref('signs/'+ season + number).push(signData).key
+            // firebase.database().ref('tablets/'+ season + '/' + number + '/' + view + '/lines/' + line + '/' + position ).set(lineData)
           }
         })
+        function setSigns(sign, line){
+          return new Promise(function(resolve, reject){
+            console.log('setting the sign')
+            console.log(Date.now())
+            firebase.database().ref('signs/'+ sign.season + sign.number + '/uploaded').set(Date.now())
+            firebase.database().ref('signs/'+ sign.season + sign.number + '/season').set(sign.season)
+            firebase.database().ref('signs/'+ sign.season + sign.number + '/number').set(sign.number)
+            firebase.database().ref('signs/'+ sign.season + sign.number + '/view/' + sign.view + '/' + sign.uuid).set(sign)
+            //firebase.database().ref('tablets/'+ sign.season + '/' + sign.number + '/' + sign.view + '/lines/' + sign.line + '/' + sign.position ).set(line)
+          })
+        }
         function getLines() {
           console.log('in the line dat')
           return new Promise(function(resolve, reject) {
             try{
-              firebase.database().ref('identified_characters').orderByKey().limitToFirst(5).once('value').then(function(snapshot) {
+              firebase.database().ref('identified_characters').orderByKey().limitToFirst(800).once('value').then(function(snapshot) {
               //firebase.database().ref('identified_characters').once('value').then(function(snapshot) {
                 resolve(snapshot.val());
               });

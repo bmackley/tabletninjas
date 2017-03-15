@@ -228,7 +228,6 @@
         var tabletsPath = 'tablets/' + season + '/' + number + '/';
         var username;
         var count;
-
         var getUser = this.getUser();
         var countPromise = this.getImageCount(countPath);
 
@@ -253,6 +252,7 @@
                   provider: provider
                 });
                 //save image to storage
+                console.log('image info', username, source, provider)
                 storageRef.put(e.detail.file);
               }catch(error){
                 alert('Please talk to Ben. You received error: ' + error)
