@@ -1,6 +1,7 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/paper-tooltip/paper-tooltip.html">
 <link rel="import" href="../bower_components/iron-icons/iron-icons.html">
 <link rel="import" href="../bower_components/iron-icon/iron-icon.html">
 <link rel="import" href="tabletninjas-header.html">
@@ -10,7 +11,6 @@
   <style include="shared-styles">
     :host {
       display: block;
-      background-color: black;
     }
     /*#flex-container{
       display: flex;
@@ -30,6 +30,7 @@
       bottom:0px;
       opacity: .85;
       height: inherit;
+      color: white;
       /*max-height: 22%;*/
     }
     #signs{
@@ -63,6 +64,15 @@
       border-style: solid;
       border-radius:15%
     }
+    paper-button{
+      border-color: white;
+      border-width: 2px;
+      border-style: solid;
+      margin-top: 5px;
+    }
+    body{
+      color: white;
+    }
 
   </style>
   <template>
@@ -72,7 +82,8 @@
       <!-- src ="../images/KUG03-obv-01.jpg" -->
     </div>
     <div id = "footer-container">
-      <center><div class ="black-background" id><iron-icon class = "big" icon="arrow-back"></iron-icon><span style="color:white">Line 1</span><iron-icon class = "big" icon="arrow-forward"></iron-icon></div></center>
+      <!-- <div class ="black-background" id><iron-icon class = "big" icon="arrow-back"></iron-icon><span style="color:white">Line 1</span><iron-icon class = "big" icon="arrow-forward"></iron-icon></div> -->
+      <center><paper-button id="nextImage">Tagging Complete</paper-button></center>
       <div id = "signs">
         <span id = "signs-scroll">
           <!-- This is where all of the Hotspots are placed -->
@@ -80,18 +91,9 @@
       </div>
     </div>
   </template>
-  <!-- <script src = "../bower_components/interactjs/interact.js"></script> -->
-  <script
-    src="https://code.jquery.com/jquery-3.1.1.js"
-    integrity="sha256-16cdPddA6VdVInumRGo6IbivbERE8p7CQR3HzTBuELA="
-    crossorigin="anonymous">
-  </script>
-  <script
-  src="http://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
-  integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU="
-  crossorigin="anonymous">
-  </script>
-  <!-- <script src = "tag-hotspots.js"> -->
+
+  <script type="text/javascript" src= "../bower_components/jquery/dist/jquery.min.js"></script>
+  <script type="text/javascript" src= "../bower_components/jquery-ui/jquery-ui.js"></script>
 
   </script>
   <script>
@@ -100,6 +102,9 @@
       properties: {
         username: String
       },
+      // listeners: {
+      //   'nextImage.tap': 'getNextImage'
+      // },
       ready: function() {
         firebase.auth().onAuthStateChanged(function(user) {
           if (!user) {
@@ -114,7 +119,7 @@
         var tabletSeason, tabletNumber, tabletView, tabletLocation;
         var hotspotArray = [];
         var signs = [];
-
+        var userLastTablet;
         $(this.root.querySelector('#Tablet')).on('load', function(){
           var height = $(this).css('height')
           var footerHeight = self.root.querySelector('#footer-container').offsetHeight;
@@ -150,6 +155,7 @@
         var userData = getUser();
         userData.then(function(data){
           if(data){
+            console.log('data', data)
             var signsPath = 'signs/' + data.season + data.number + '/view/' +  data.view;
             var signs = getSigns(signsPath);
             signs.then(function(data){
@@ -190,8 +196,10 @@
               console.log('error', error)
             })
           }else{
+            console.log('getNextTablet')
             var tablet = getNextTablet('1')
             tablet.then(function(tablet){
+              console.log('tablet', tablet)
               var imagePromises = []
               for(obj in tablet.view){
                 imagePromises.push(getTabletImage(tablet, obj))
@@ -209,14 +217,16 @@
           })
         }
         function getAllImages(imageList, tablet, obj){
+          console.log('imageList', imageList)
           Promise.all(imageList).then(function(results){
             for(item in results){
                 //NOW WE SET IT IN THE TABLET IMAGE')
+                console.log('results', results)
               if(results[item]){
-                var newPath = 'tablets/' + results[item].tablet.season + '/' + results[item].tablet.number + '/' + results[item].obj
-                var imagePath = 'tablets/' + results[item].tablet.season + '/' + results[item].tablet.number +
-                firebase.database().ref('users/'+ user.uid + '/' + newPath + '/' + 'status').set('NOT STARTED')
-                firebase.database().ref('users/'+ user.uid + '/' + newPath + '/' + 'location').set(results[item].location)
+                var newPath = '/tablets/new/' + results[item].tablet.season + '/' + results[item].tablet.number + '/' + results[item].obj
+                // var imagePath = 'tablets/' + results[item].tablet.season + '/' + results[item].tablet.number +
+                firebase.database().ref('users/'+ user.uid + newPath + '/' + 'status').set('NOT STARTED')
+                firebase.database().ref('users/'+ user.uid + newPath + '/' + 'location').set(results[item].location)
               }else{
                 console.log('NO image for ', tablet.view)
               }
@@ -224,11 +234,18 @@
           })
           .catch(function(err){console.log('error', err)})
         }
+        $(this.root.querySelector('#nextImage')).on('click', function(){
+          var newPath = 'tablets/' + tabletSeason + '/' + tabletNumber + '/' + tabletView
+          firebase.database().ref('users/'+ user.uid + '/' + newPath + '/' + 'status').set('DONE');
+          location.reload();
+        })
 
         function getTabletImage(tablet, obj){
           return new Promise(function(resolve, reject){
+            console.log('getTabletImage tablet', tablet, obj)
             var path = 'tablets/' + tablet.season + '/' + tablet.number + '/' + obj;
             firebase.database().ref(path).once('value').then(function(snapshot) {
+              console.log(snapshot.val())
               //eventually get multiple images if they exist
               snapshot.forEach(function(childSnapshot) {
                 var childPath = childSnapshot.key;
@@ -255,6 +272,7 @@
                   tablet: tablet,
                   obj: obj
                 }
+                console.log('tablet info', tabletInfo)
                 resolve(tabletInfo);
               })
             })
@@ -274,28 +292,32 @@
         function getUser() {
           return new Promise(function(resolve, reject){
             try{
-              firebase.database().ref('users/'+ user.uid + '/tablets').once('value').then(function(snapshot) {
-                snapshot.forEach(function(childSnapshot){
-                  childSnapshot.forEach(function(grandChildSnapshot){
-                    // console.log('gcsnapshot key', grandChildSnapshot.key)
-                    grandChildSnapshot.forEach(function(greatGrandChildSnapshot){
-                      greatGrandChildSnapshot.forEach(function(lastChildSnapshot){
-                        if(lastChildSnapshot.key === 'status'){
-                          if(lastChildSnapshot.val() === 'NOT STARTED'){
-                            var imageLocation = childSnapshot.key + '/' + grandChildSnapshot.key + '/' + greatGrandChildSnapshot.val().location
-                            var imageInfo = {
-                              season: childSnapshot.key,
-                              number: grandChildSnapshot.key,
-                              view: greatGrandChildSnapshot.key,
-                              imageLocation: imageLocation
+              firebase.database().ref('users/'+ user.uid + '/tablets/new').once('value').then(function(snapshot) {
+                if(snapshot.hasChild('Kt94k')){
+                  snapshot.forEach(function(childSnapshot){
+                    childSnapshot.forEach(function(grandChildSnapshot){
+                      // console.log('gcsnapshot key', grandChildSnapshot.key)
+                      grandChildSnapshot.forEach(function(greatGrandChildSnapshot){
+                        greatGrandChildSnapshot.forEach(function(lastChildSnapshot){
+                          if(lastChildSnapshot.key === 'status'){
+                            if(lastChildSnapshot.val() === 'NOT STARTED'){
+                              var imageLocation = childSnapshot.key + '/' + grandChildSnapshot.key + '/' + greatGrandChildSnapshot.val().location
+                              var imageInfo = {
+                                season: childSnapshot.key,
+                                number: grandChildSnapshot.key,
+                                view: greatGrandChildSnapshot.key,
+                                imageLocation: imageLocation
+                              }
+                              resolve(imageInfo)
                             }
-                            resolve(imageInfo)
                           }
-                        }
+                        })
                       })
                     })
                   })
-                })
+                }else{
+                  resolve(false)
+                }
               })
             }catch(error){
               console.log('error', error)
@@ -304,13 +326,12 @@
         }
 
         function hotspot(id, left, top, width, height, sign){
-          console.log('hotspot function')
           this.id = id;
           this.x = left;
           this.y = top;
           this.width = width;
           this.height = height;
-          this.html = "<img src='../images/signs/" + sign + ".png' id = '"+ 'one' + "' class='graph'>"//get the correct ID from Firebase
+          this.html = "<img src='../images/signs/" + sign + ".png' id = '"+ 'one' + "' class='graph'>"
         }
 
         hotspot.prototype.attachHotspot = function(){
@@ -321,8 +342,43 @@
           var height = tablet.height * this.height;
           var attachedGraph = $(this.html).clone();
           var imageAreaDrop = self.shadowRoot.querySelector('#imageArea');
-          var imageHTML = '<img style="background-color: black; position: absolute; left:'+ left+ '%; top:'+ top+ '%; width:'+ width+ 'px; height:'+ height+ 'px;" src="'+ attachedGraph[0].src +'">';
+          var imageHTML = '<img style="background-color: black; position: absolute; left:'+ left+ '%; top:'+ top+ '%; width:'+ width+ 'px; height:'+ height+ 'px;" id = "image'+ this.id +'" class = "hotspot" src="'+ attachedGraph[0].src +'">';
+          //If we want to do drag handles all around, then we need to make the height and width be percentages
+          var newWidth = left + (this.width*100)
+          var newHeight = top + (this.height*100)
+          // var dragHandle = '<div class="handle" id = "handle'+ this.id + '" style="background-color: white; width: 15px; height: 15px; cursor: se-resize; position: absolute; left:'+ newWidth + '%;top:'+ newHeight+ '%;"></div>'
           $(imageAreaDrop).append(imageHTML)
+          // $(imageAreaDrop).append(dragHandle)
+
+          // var resizeHandle = self.shadowRoot.querySelector('#handle'+this.id);;
+          // var box = self.shadowRoot.querySelector('#image' + this.id);
+          // resizeHandle.addEventListener('mousedown', initialiseResize, false);
+          //
+          // function initialiseResize(e) {
+          // 	window.addEventListener('mousemove', startResizing, false);
+          //    	window.addEventListener('mouseup', stopResizing, false);
+          // }
+          //
+          // function startResizing(e) {
+          //    box.style.width = (e.clientX - box.offsetLeft) + 'px';
+          //    box.style.height = (e.clientY - box.offsetTop) + 'px';
+          //    resizeHandle.style.left = e.pageX;
+          //    resizeHandle.style.top = e.pageY;
+          // }
+          // function stopResizing(e) {
+          //     window.removeEventListener('mousemove', startResizing, false);
+          //     window.removeEventListener('mouseup', stopResizing, false);
+          // }
+
+
+
+
+          // $(self.root.querySelector('.hotspot')).on('mouseover', function(){
+          //   this.style.opacity = .6;
+          // })
+          // $(self.root.querySelector('.hotspot')).on('mouseout', function(){
+          //   this.style.opacity = 0;
+          // })
           //TO DO: RESIZE THE HOTSPOTS ON A WINDOW RESIZE
         }
 
@@ -332,14 +388,15 @@
             //Calculate position
             var signDataPoints = calculateSignPercentages($(currentDraggable).offset().left, $(tabletDropArea).offset().left, $(currentDraggable).offset().top, $(tabletDropArea).offset().top, currentDraggable.width, tabletDropArea.width, currentDraggable.height, tabletDropArea.height)
             var firebaseHotspot = saveHotspot(signDataPoints.left, signDataPoints.top, signDataPoints.width, signDataPoints.height, currentDraggable.dataset.sign)
-            newHotspot = new hotspot((hotspotArray.length + 1), signDataPoints.left, signDataPoints.top, signDataPoints.width, signDataPoints.height, currentDraggable.dataset.sign);
-            hotspotArray.push(newHotspot);//set position and height of image
-            newHotspot.attachHotspot()
+            firebaseHotspot.then(function(hotspotKey){
+              newHotspot = new hotspot(hotspotKey, signDataPoints.left, signDataPoints.top, signDataPoints.width, signDataPoints.height, currentDraggable.dataset.sign);
+              hotspotArray.push(newHotspot);//set position and height of image
+              newHotspot.attachHotspot()
+            })
           }
         });
 
         function calculateSignPercentages(uix, tabletx, uiy, tablety, uiwidth, tabletwidth, uiheight, tabletheight){
-          console.log('calc sign percentages')
           return {
             left: ((uix - tabletx)/(tabletwidth - tabletx)),
             top: ((uiy - tablety)/(tabletheight - tablety)),
@@ -348,19 +405,25 @@
           }
         } //calculateSignPercentages
         function saveHotspot (left, top, width, height, sign){
-          var date = new Date().getTime();
-          var hotspotData = {
-            'left': left,
-            'top': top,
-            'width': width,
-            'height': height,
-            'sign': sign,
-            'date': date,
-          }
-          firebase.database().ref('tablets/' + tabletLocation + '/hotspots').push(hotspotData);
-          firebase.database().ref('users/'+ user.uid + '/hotspots/' + tabletLocation).push(hotspotData)
+          return new Promise(function(resolve, reject){
+            var date = new Date().getTime();
+            var hotspotData = {
+              'left': left,
+              'top': top,
+              'width': width,
+              'height': height,
+              'sign': sign,
+              'date': date,
+            }
+            firebase.database().ref('tablets/' + tabletLocation + '/hotspots').push(hotspotData);
+            resolve(firebase.database().ref('users/'+ user.uid + '/hotspots/' + tabletLocation).push(hotspotData).key)
+          })//Promise
         }//saveHotspot
-      }//Ready
+      },//Ready
+      // getNextImage: function(){
+      //   console.log('getting the next image')
+      //   console.log('tabletloc', tabletLocation)
+      // }
     });//Polymer
   </script>
 </dom-module>

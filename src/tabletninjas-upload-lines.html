@@ -174,7 +174,12 @@
         });
         var lineData = getLines();
         lineData.then(function(data){
+          firebase.database().ref('signs/').set('')
           for(obj in data){
+            // firebase.database().ref('signs/'+ data[obj].season + data[obj].number + '/uploaded').set(Date.now())
+            // firebase.database().ref('signs/'+ data[obj].season + data[obj].number + '/season').set(data[obj].season)
+            // firebase.database().ref('signs/'+ data[obj].season + data[obj].number + '/number').set(data[obj].number)
+            // firebase.database().ref('signs/'+ data[obj].season + data[obj].number + '/view/' + data[obj].view + '/' + data[obj].uuid).set(data[obj])
             console.log('obj', data[obj])
             // console.log('obj uuid', data[obj].UUID)
             // console.log('obj', data[obj])
@@ -185,14 +190,14 @@
             // console.log('obj line', data[obj].line)
             // console.log('obj sign', data[obj].Sign)
             // console.log('obj view', data[obj].Side)
-            var name = data[obj].Name;
-            var uuid = data[obj].UUID;
-            var number = data[obj].Number;
-            var position = data[obj].Position;
-            var season = data[obj].Season;
+            var name = data[obj].name;
+            var uuid = data[obj].uuid;
+            var number = data[obj].number;
+            var position = data[obj].position;
+            var season = data[obj].season;
             var line = data[obj].line;
-            var sign = data[obj].Sign;
-            var view = data[obj].Side;
+            var sign = data[obj].sign;
+            var view = data[obj].view;
             var signData = {
               'name': name,
               'uuid': uuid,
@@ -203,21 +208,27 @@
               'sign': sign,
               'view': view
             }
-            var lineData = {
-              'sign': sign,
-              'name': name,
-              'uuid': uuid,
-            }
-            console.log('data', signData)
-            setSigns(signData, lineData)
+            console.log('sign data', signData)
+            firebase.database().ref('signs/'+ signData.season + signData.number + '/uploaded').set(Date.now())
+            firebase.database().ref('signs/'+ signData.season + signData.number + '/season').set(signData.season)
+            firebase.database().ref('signs/'+ signData.season + signData.number + '/number').set(signData.number)
+            firebase.database().ref('signs/'+ signData.season + signData.number + '/view/' + signData.view + '/' + signData.uuid).set(signData)
+
+            // var lineData = {
+            //   'sign': data[obj].sign,
+            //   'name': data[obj].name,
+            //   'uuid': data[obj].uuid,
+            // }
+            // console.log('data', signData)
+            // setSigns(data[obj], lineData)
             // firebase.database().ref('signs/'+ season + number).push(signData).key
             // firebase.database().ref('tablets/'+ season + '/' + number + '/' + view + '/lines/' + line + '/' + position ).set(lineData)
           }
+          console.log("done")
         })
         function setSigns(sign, line){
           return new Promise(function(resolve, reject){
-            console.log('setting the sign')
-            console.log(Date.now())
+            console.log('sign', sign)
             firebase.database().ref('signs/'+ sign.season + sign.number + '/uploaded').set(Date.now())
             firebase.database().ref('signs/'+ sign.season + sign.number + '/season').set(sign.season)
             firebase.database().ref('signs/'+ sign.season + sign.number + '/number').set(sign.number)
@@ -229,7 +240,7 @@
           console.log('in the line dat')
           return new Promise(function(resolve, reject) {
             try{
-              firebase.database().ref('identified_characters').orderByKey().limitToFirst(800).once('value').then(function(snapshot) {
+              firebase.database().ref('identified_characters').startAt('1').endAt('1000').orderByKey().limitToFirst(1000).once('value').then(function(snapshot) {
               //firebase.database().ref('identified_characters').once('value').then(function(snapshot) {
                 resolve(snapshot.val());
               });
