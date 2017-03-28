@@ -82,7 +82,7 @@
       <!-- src ="../images/KUG03-obv-01.jpg" -->
     </div>
     <div id = "footer-container">
-      <!-- <div class ="black-background" id><iron-icon class = "big" icon="arrow-back"></iron-icon><span style="color:white">Line 1</span><iron-icon class = "big" icon="arrow-forward"></iron-icon></div> -->
+      <div class ="black-background"><iron-icon class = "big" icon="arrow-back" id="previousLine"></iron-icon><span style="color:white" id = "lineNumber">Line 1</span><iron-icon class = "big" icon="arrow-forward" id="nextLine"></iron-icon></div>
       <center><paper-button id="nextImage">Tagging Complete</paper-button></center>
       <div id = "signs">
         <span id = "signs-scroll">
@@ -119,6 +119,7 @@
         var tabletSeason, tabletNumber, tabletView, tabletLocation;
         var hotspotArray = [];
         var signs = [];
+        var currentLine;
         var userLastTablet;
         $(this.root.querySelector('#Tablet')).on('load', function(){
           var height = $(this).css('height')
@@ -155,36 +156,14 @@
         var userData = getUser();
         userData.then(function(data){
           if(data){
-            console.log('data', data)
-            var signsPath = 'signs/' + data.season + data.number + '/view/' +  data.view;
-            var signs = getSigns(signsPath);
-            signs.then(function(data){
-              var signs = $.map(data, function(value, index) {
+            var signsPath = 'signs/' + data.season + data.number + '/view/' +  data.view + '/line/';
+            var databaseSigns = getSigns(signsPath);
+            databaseSigns.then(function(data){
+              signs = $.map(data, function(value, index) {
                   return [value];
               });
-              signs.sort(compare);
-              for(sign in signs){
-                var img = new Image(); // width, height values are optional params
-                tabletNumber = signs[sign].number
-                tabletSeason = signs[sign].season;
-                tabletView = signs[sign].view;
-                img.src = "../images/signs/" + signs[sign].sign + ".png";
-                var imageSign = document.createAttribute('data-sign')
-                imageSign.value = signs[sign].sign;
-                img.setAttributeNode(imageSign)
-                self.root.querySelector('#signs-scroll').appendChild(img);
-              }
-              function compare(a, b) {
-                if (a.line < b.line)
-                  return -1;
-                if (a.line > b.line)
-                  return 1;
-                if (a.position < b.position)
-                  return -1;
-                if (a.position > b.position)
-                  return 1;
-                return 0;
-              }
+              showSigns(signs);
+              // lines.sort(compare);
             })
             tabletLocation = data.imageLocation;
             var pathReference = firebase.storage().ref('tablets/' + data.imageLocation);
@@ -196,7 +175,6 @@
               console.log('error', error)
             })
           }else{
-            console.log('getNextTablet')
             var tablet = getNextTablet('1')
             tablet.then(function(tablet){
               console.log('tablet', tablet)
@@ -210,18 +188,87 @@
         })//user data
         function getSigns(path){
           return new Promise(function(resolve, reject){
-            console.log('path', path)
             firebase.database().ref(path).once('value').then(function(snapshot) {
               resolve(snapshot.val())
             });
           })
         }
+
+        function showSigns(signs){
+          // console.log('signs', signs)
+          // //var lines = signs.sort(compare);
+          // console.log('lines', lines)
+          var lines = signs;
+          for(line in lines){
+            console.log('line', lines[line])
+            var orderedSigns = $.map(lines[line], function(value, index) {
+                [value].sort(compare)
+                return [value];
+            });
+            console.log('orderedSigns', orderedSigns)
+            for(sign in lines[line]){
+              var img = new Image(); // width, height values are optional params
+              // tabletNumber = newsigns[sign].number
+              // tabletSeason = newsigns[sign].season;
+              // tabletView = lines[line][sign].view;
+              if(currentLine){}else{currentLine = lines[line][sign].line }
+              if(currentLine === lines[line][sign].line){
+                $(self.shadowRoot.querySelector('#lineNumber')).html('Line ' + currentLine)
+                //   tabletNumber = newsigns[sign].number
+                //   tabletSeason = newsigns[sign].season;
+                //   tabletView = newsigns[sign].view;
+                img.src = "../images/signs/" + lines[line][sign].sign + ".png";
+                var imageSign = document.createAttribute('data-sign')
+                imageSign.value = lines[line][sign].sign;
+                img.setAttributeNode(imageSign)
+                self.root.querySelector('#signs-scroll').appendChild(img);
+              }
+            }
+          }
+          function compare(a, b) {
+            console.log('a', a)
+            console.log('b', b)
+            console.log('a', a.position)
+            // if (a.line < b.line)
+            //   return -1;
+            // if (a.line > b.line)
+            //   return 1;
+            if (a.position < b.position)
+              return -1;
+            if (a.position > b.position)
+              return 1;
+            return 0;
+          }
+        }
+        $(this.root.querySelector('#nextLine')).on('click', function(){
+          //check if we can go to the next line
+          var lines = signs;
+          var nextLine = parseInt(currentLine) + 1;
+          for(line in lines){
+            for(sign in lines[line]){
+              var img = new Image();
+              if(nextLine == lines[line][sign].line){
+                currentLine = nextLine;
+                nextLine = null;
+                $(self.shadowRoot.querySelector('#signs-scroll')).html('Line').html('')
+                $(self.shadowRoot.querySelector('#lineNumber')).html('');
+                $(self.shadowRoot.querySelector('#lineNumber')).html('Line ' + currentLine);
+              }
+              if(currentLine == lines[line][sign].line){
+                img.src = "../images/signs/" + lines[line][sign].sign + ".png";
+                var imageSign = document.createAttribute('data-sign')
+                imageSign.value = lines[line][sign].sign;
+                img.setAttributeNode(imageSign)
+                self.root.querySelector('#signs-scroll').appendChild(img);
+              }
+            }
+          }
+        })
+
         function getAllImages(imageList, tablet, obj){
-          console.log('imageList', imageList)
           Promise.all(imageList).then(function(results){
             for(item in results){
                 //NOW WE SET IT IN THE TABLET IMAGE')
-                console.log('results', results)
               if(results[item]){
                 var newPath = '/tablets/new/' + results[item].tablet.season + '/' + results[item].tablet.number + '/' + results[item].obj
                 // var imagePath = 'tablets/' + results[item].tablet.season + '/' + results[item].tablet.number +
@@ -234,6 +281,7 @@
           })
           .catch(function(err){console.log('error', err)})
         }
+
         $(this.root.querySelector('#nextImage')).on('click', function(){
           var newPath = 'tablets/' + tabletSeason + '/' + tabletNumber + '/' + tabletView
           firebase.database().ref('users/'+ user.uid + '/' + newPath + '/' + 'status').set('DONE');
