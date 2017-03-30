@@ -12,7 +12,7 @@
 <link rel="import" href="tabletninjas-header.html">
 <link rel="import" href="shared-styles.html">
 
-<dom-module id="tabletninjas-upload">
+<dom-module id="tabletninjas-upload-lines">
   /*<style include="shared-styles">
     :host {
       display: block;
@@ -127,8 +127,6 @@
             <paper-item id="MusArtHistoireGeneva">MusArtHistoireGeneva</paper-item>
             <paper-item id="NiesBabYale">NiesBabYale</paper-item>
             <paper-item id="OrientalInstituteChicago">OrientalInstituteChicago</paper-item>
-            <paper-item id="PennMuseumArch-CBS">PennMuseumArch-CBS</paper-item>
-            <paper-item id="PennMuseumArch-UM">PennMuseumArch-UM</paper-item>
             <paper-item id="RoyalOntarioMuseum">RoyalOntarioMuseum</paper-item>
             <paper-item id="RoyalScottishMuseum">RoyalScottishMuseum</paper-item>
             <paper-item id="SadbergHanimCollection">SadbergHanimCollection</paper-item>
@@ -147,60 +145,16 @@
             <paper-item id="AnkaraNotAMM">AnkaraNotAMM</paper-item>
             <paper-item id="Konya">Konya</paper-item>
           </paper-listbox>
-        </paper-dropdown-menu><br>
-        <paper-dropdown-menu label="Source">
-          <paper-listbox class="dropdown-content" id = "imageSource" attr-for-selected = 'id'>
-            <paper-item id='Larsen'>Larsen</paper-item>
-            <paper-item id='Stratford'>Stratford</paper-item>
-            <paper-item id='British Museum'>British Museum</paper-item>
-            <paper-item id='Prague Collection'>Prague Collection</paper-item>
-            <paper-item id="Barjamovich">Barjamovich</paper-item>
-            <paper-item id="Schwemmer">Schwemmer</paper-item>
-          </paper-listbox>
-        </paper-dropdown-menu><br>
-        <paper-dropdown-menu label="Image Provider">
-          <paper-listbox class="dropdown-content" id = "imageProvider" attr-for-selected = 'id'>
-            <paper-item id="Larsen">Larsen</paper-item>
-            <paper-item id="Stratford">Stratford</paper-item>
-            <paper-item id="CDLI">CDLI</paper-item>
-            <paper-item id="CDLI">Prague Collection</paper-item>
-            <paper-item id="PennMuseum">PennMuseum</paper-item>
-            <paper-item id="Ashmolean">Ashmolean</paper-item>
-          </paper-listbox>
-        </paper-dropdown-menu><br>
-        <paper-input name="Image Number" id="imageNumber" label="Image Number" value="[[imageNumber]]"></paper-input>
-        <!-- Options obverse, reverse, -->
-        <paper-dropdown-menu label="Image View">
-        <paper-listbox class="dropdown-content" id = "imageView" attr-for-selected = 'id'>
-          <paper-item id="obv">obverse (front)</paper-item>
-          <paper-item id="lower-edge">lower edge</paper-item>
-          <paper-item id='rev'>reverse (back)</paper-item>
-          <paper-item id='ue'>upper edge</paper-item>
-          <paper-item id='left-edge'>left edge</paper-item>
-          <paper-item id='right-edge'>right edge</paper-item>
-          <paper-item id='scale'>scale</paper-item>
-          <paper-item id='glamor'>glamor</paper-item>
-          <paper-item id='other'>other</paper-item>
-        </paper-listbox>
-      </paper-dropdown-menu><br>
-      <paper-dropdown-menu label="Image Angle">
-        <paper-listbox class="dropdown-content" id="imageAngle" selected="straight" attr-for-selected = 'id'>
-          <paper-item id='straight'>straight</paper-item>
-          <paper-item id='above'>above</paper-item>
-          <paper-item id='below'>below</paper-item>
-          <paper-item id='right'>right</paper-item>
-          <paper-item id='left'>left</paper-item>
-        </paper-listbox>
-      </paper-dropdown-menu>
+        </paper-dropdown-menu>
       </form>
-      <vaadin-upload accept="image/*" maxFiles=1 on-upload-before="submitNewTabletImage"></vaadin-upload>
+      <vaadin-upload maxFiles=1 on-upload-before="submitNewTabletLines"></vaadin-upload>
     </paper-card>
   </center>
   </template>
   <!-- <script src = "../bower_components/interact.js"></script> -->
   <script>
     Polymer({
-      is: 'tabletninjas-upload',
+      is: 'tabletninjas-upload-lines',
       properties: {
         user: {
           type: String,
@@ -209,92 +163,55 @@
       },
       ready: function() {
         firebase.auth().onAuthStateChanged(function(user) {
+          console.log('user', user)
           if (!user) {
             //change this to profile once the profile page is created.
             window.location = "/login"
           }
-        });
-      },
-      submitNewTabletImage: function(e) {
-        //Variable Declarations
-        var season = this.$.imageSeason.selected;
-        var number = this.$.imageNumber.value;
-        var view = this.$.imageView.selected;
-        var angle = this.$.imageAngle.selected;
-        var provider = this.$.imageProvider.selected;
-        var source = this.$.imageSource.selected;
-        var time = new Date().getTime();
-        var countPath = 'tablets/' + season + '/' + number + '/' + view + '/' + angle;
-        var tabletsPath = 'tablets/' + season + '/' + number + '/';
-        var username;
-        var count;
-        var getUser = this.getUser();
-        var countPromise = this.getImageCount(countPath);
-
-        getUser.then(function(data) {
-          username = data;
-          countPromise.then(function(data2) {
-            count = data2;
-            var storagePath = countPath + '/' + count;
-            var imagePath = season + '_' + number + '_' + view + '_' + angle + '_' + count
-            var storageRef = firebase.storage().ref(tabletsPath + imagePath);
-            if(typeof season && number && typeof view != 'undefined'){
-              try{
-                firebase.database().ref(storagePath).set({
-                  season: season,
-                  number: number,
-                  view:  view,
-                  angle: angle,
-                  location: imagePath,
-                  date: time,
-                  username: username,
-                  source: source,
-                  provider: provider
-                });
-                //save image to storage
-                console.log('image info', username, source, provider)
-                storageRef.put(e.detail.file);
-              }catch(error){
-                alert('Please talk to Ben. You received error: ' + error)
-              }
-            }else{
-              alert('you have not filled out all the fields')
-            }
-          }, function(error) {
-            alert('Inform ben that Firebase Count Function failed with ' + error.message)
-          });
-        }, function(error) {
-          alert('Inform ben that Firebase User Function failed with ' + error.message)
-        });
-
-      },
-      getUser: function(){
-        return new Promise(function(resolve, reject) {
-          firebase.auth().onAuthStateChanged(function(user) {
-            if (user) {
-              resolve(user.email);
-            } else {
-              window.location = "/login"
-            }
-          });
-        })
-      },
-      getImageCount: function(countPath) {
-        return new Promise(function(resolve, reject) {
-          try{
-            firebase.database().ref(countPath).once('value').then(function(snapshot) {
-              var count = 1;
-              for(value in snapshot.val()){
-                count++;
-              }
-              resolve( count);
-            });
-          }catch(error){
-            reject(Error(error))
+          if (user.email != 'bmackley@byu.edu') {
+            console.log('wrong email')
           }
+        });
+        var lineData = getLines();
+        lineData.then(function(data){
+          var signPromises = []
+          firebase.database().ref('signs/').set('')
+          for(obj in data){
+            firebase.database().ref('signs/'+ data[obj].season + data[obj].number + '/uploaded').set(Date.now())
+            firebase.database().ref('signs/'+ data[obj].season + data[obj].number + '/season').set(data[obj].season)
+            firebase.database().ref('signs/'+ data[obj].season + data[obj].number + '/number').set(data[obj].number)
+            signPromises.push(setSigns(data[obj]))
+            console.log('data obj', data[obj])
+          }
+          getAllSigns(signPromises);
+          console.log("done")
         })
-      }
+        function setSigns(sign){
+          return new Promise(function(resolve, reject){
+            newValue = firebase.database().ref('signs/'+ sign.season + sign.number + '/view/' + sign.view + '/line/' + sign.line + '/' + sign.uuid).set(sign)
 
+          })
+        }
+        function getAllSigns(signPromises){
+          Promise.all(signPromises).then(function(results){
+            console.log('results', results)
+          })
+        }
+        function getLines() {
+          console.log('in the line dat')
+          return new Promise(function(resolve, reject) {
+            try{
+              firebase.database().ref('identified_characters').startAt('1').endAt('10000').orderByKey().limitToFirst(10000).once('value').then(function(snapshot) {
+              //firebase.database().ref('identified_characters').once('value').then(function(snapshot) {
+                resolve(snapshot.val());
+              });
+            }catch(error){
+              console.log('error', error)
+              reject(Error(error))
+            }
+          })
+        }
+      },
     });
   </script>
 </dom-module>

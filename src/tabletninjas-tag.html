@@ -1,6 +1,7 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/paper-tooltip/paper-tooltip.html">
 <link rel="import" href="../bower_components/iron-icons/iron-icons.html">
 <link rel="import" href="../bower_components/iron-icon/iron-icon.html">
 <link rel="import" href="tabletninjas-header.html">
@@ -10,7 +11,6 @@
   <style include="shared-styles">
     :host {
       display: block;
-      background-color: black;
     }
     /*#flex-container{
       display: flex;
@@ -29,20 +29,27 @@
       position: fixed;
       bottom:0px;
       opacity: .85;
+      height: inherit;
+      color: white;
+      /*max-height: 22%;*/
     }
     #signs{
       overflow: auto;
       white-space: nowrap;
+      height: inherit;
     }
     #signs > * {
       vertical-align: middle;
     }
     #signs #signs-scroll {
       display: inline-block;
+      height: inherit;
+      /*max-height: 20%*/
     }
     #signs img {
-      width: 11%;
+      max-width: 11%;
       display: inline-block;
+      max-height: 150px;
       /*maybe figure out a way to get the images on the same line and to scroll?*/
     }
     .graph {
@@ -57,43 +64,36 @@
       border-style: solid;
       border-radius:15%
     }
+    paper-button{
+      border-color: white;
+      border-width: 2px;
+      border-style: solid;
+      margin-top: 5px;
+    }
+    body{
+      color: white;
+    }
 
   </style>
   <template>
     <tabletninjas-header></tabletninjas-header>
     <div id = "imageArea">
-      <img id ='Tablet' class = "hbwrap droppable" src ="../images/KUG03-obv-01.jpg">
+      <img id ='Tablet' class = "hbwrap droppable">
+      <!-- src ="../images/KUG03-obv-01.jpg" -->
     </div>
     <div id = "footer-container">
-      <center><div class ="black-background" id><iron-icon class = "big" icon="arrow-back"></iron-icon><span style="color:white">Line 1</span><iron-icon class = "big" icon="arrow-forward"></iron-icon></div></center>
+      <div class ="black-background"><iron-icon class = "big" icon="arrow-back" id="previousLine"></iron-icon><span style="color:white" id = "lineNumber">Line 1</span><iron-icon class = "big" icon="arrow-forward" id="nextLine"></iron-icon></div>
+      <center><paper-button id="nextImage">Tagging Complete</paper-button></center>
       <div id = "signs">
         <span id = "signs-scroll">
-          <img src ="../images/signs/001.png" id="one" data-sign='001'>
-          <img src ="../images/signs/002a.png" id="two" data-sign='002a'>
-          <img src ="../images/signs/001.png" id="three" data-sign='001'>
-          <img src ="../images/signs/002a.png" id="four" data-sign='002a'>
-          <img src ="../images/signs/001.png" id="five" data-sign='001'>
-          <img src ="../images/signs/002a.png" id="six" data-sign='002a'>
-          <img src ="../images/signs/001.png" id="seven" data-sign='001'>
-          <img src ="../images/signs/001.png" id="eight" data-sign='001'>
-          <img src ="../images/signs/001.png" id="nine" data-sign='001'>
-          <img src ="../images/signs/001.png" id="ten" data-sign='001'>
+          <!-- This is where all of the Hotspots are placed -->
         </span>
       </div>
     </div>
   </template>
-  <!-- <script src = "../bower_components/interactjs/interact.js"></script> -->
-  <script
-    src="https://code.jquery.com/jquery-3.1.1.js"
-    integrity="sha256-16cdPddA6VdVInumRGo6IbivbERE8p7CQR3HzTBuELA="
-    crossorigin="anonymous">
-  </script>
-  <script
-  src="http://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
-  integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU="
-  crossorigin="anonymous">
-  </script>
-  <!-- <script src = "tag-hotspots.js"> -->
+
+  <script type="text/javascript" src= "../bower_components/jquery/dist/jquery.min.js"></script>
+  <script type="text/javascript" src= "../bower_components/jquery-ui/jquery-ui.js"></script>
 
   </script>
   <script>
@@ -102,6 +102,9 @@
       properties: {
         username: String
       },
+      // listeners: {
+      //   'nextImage.tap': 'getNextImage'
+      // },
       ready: function() {
         firebase.auth().onAuthStateChanged(function(user) {
           if (!user) {
@@ -109,26 +112,296 @@
             window.location = "/login"
           }
         });
-        //Custom
+        var user = firebase.auth().currentUser;
         //GLOBAL VARIABLES
         var self = this;
-
+        var tabletDropArea = this.root.querySelector('#Tablet')
+        var tabletSeason, tabletNumber, tabletView, tabletLocation;
+        var hotspotArray = [];
+        var linesOfSigns = [];
+        var currentLine;
+        var userLastTablet;
         $(this.root.querySelector('#Tablet')).on('load', function(){
           var height = $(this).css('height')
           var footerHeight = self.root.querySelector('#footer-container').offsetHeight;
           $(self.shadowRoot.querySelector('#imageArea')).css({'height': height, 'margin-bottom': footerHeight});
+          var tabletHotspots = getHotspots();
+          tabletHotspots.then(function(data) {
+            for (var key in data) {
+               if (data.hasOwnProperty(key)) {
+                  var obj = data[key];
+                  newHotspot = new hotspot((hotspotArray.length + 1), obj.left, obj.top, obj.width, obj.height, obj.sign);
+                  hotspotArray.push(newHotspot);//set position and height of image
+                  newHotspot.attachHotspot()
+               }
+            }
+          })
+          var nodes = self.root.querySelector('#signs-scroll').childNodes
+          for (i = 0; i < nodes.length; i++){
+            if (nodes[i].nodeName.toLowerCase() == 'img') {
+              $(nodes[i]).draggable({
+                helper: 'clone',
+              });
+             }
+          }
         })
-
-        //Set up a Rectangle spot
-        var tabletDropArea = this.root.querySelector('#Tablet')
-        var hotspotArray = new Array();
-        var hotspot = function(id, left, top, width, height, sign){
+        function getHotspots(){
+          return new Promise(function(resolve, reject){
+            firebase.database().ref('users/'+ user.uid + '/hotspots/' + tabletLocation).once('value').then(function(snapshot) {
+              resolve(snapshot.val())
+            })
+          })
+        }
+        var userData = getUserTablets();
+        userData.then(function(data){
+          if(data){
+            var signsPath = 'signs/' + data.season + data.number + '/view/' +  data.view + '/line/';
+            var databaseSigns = getSigns(signsPath);
+            databaseSigns.then(function(data){
+              lines = $.map(data, function(value, index) {
+                  return [value];
+              });
+              var newSignsData = orderSigns(data)
+              linesOfSigns = newSignsData;
+              showSigns(newSignsData);
+            })
+            tabletLocation = data.imageLocation;
+            var pathReference = firebase.storage().ref('tablets/' + data.imageLocation);
+            pathReference.getDownloadURL().then(function(url){
+              var img = self.root.querySelector('#Tablet');
+              img.src = url;
+            }).catch(function(error){
+              //Need to set a variable here indicating that the picture isn't there.
+              console.log('error', error)
+            })
+          }else{
+            firebase.database().ref('users/'+ user.uid + '/nextTablet').once('value').then(function(snapshot) {
+              var tablet = getNextTablet(snapshot.val())
+              var imagePromises = []
+              tablet.then(function(tablet){
+                for(obj in tablet.view){
+                  imagePromises.push(getTabletImage(tablet, obj))
+                  //var tabletImage = getTabletImage(tablet, obj)
+                  // tabletImage.then(function(data){
+                  //   var newPath = '/tablets/new/' + data.tablet.season + '/' + data.tablet.number + '/' + data.obj
+                  //   // var imagePath = 'tablets/' + results[item].tablet.season + '/' + results[item].tablet.number +
+                  //   firebase.database().ref('users/'+ user.uid + newPath + '/' + 'status').set('NOT STARTED')
+                  //   firebase.database().ref('users/'+ user.uid + newPath + '/' + 'location').set(data.location)
+                  // })
+                }// for
+                getAllImages(imagePromises);
+                //console.log('image promises', imagePromises)
+              }) //tablet
+            })
+          }
+        })//user data
+        function getSigns(path){
+          return new Promise(function(resolve, reject){
+            firebase.database().ref(path).once('value').then(function(snapshot) {
+              resolve(snapshot.val())
+            });
+          })
+        }
+        function orderSigns(data){
+          var allOrderedSigns = [];
+          for(line in lines){
+            var orderedSigns = $.map(lines[line], function(value, index) {
+                return [value];
+            });
+            orderedSigns.sort(compare);
+            allOrderedSigns.push(orderedSigns);
+          }
+          return allOrderedSigns;
+        }
+        function compare(a, b) {
+          if (a.position < b.position)
+            return -1;
+          if (a.position > b.position)
+            return 1;
+          return 0;
+        }
+        function showSigns(lines){
+          for(line in lines){
+            var orderedSigns = $.map(lines[line], function(value, index) {
+                return [value];
+            });
+            orderedSigns.sort(compare);
+            for(sign in orderedSigns){
+              var img = new Image(); // width, height values are optional params
+              if(currentLine){}else{currentLine = orderedSigns[sign].line }
+              if(currentLine === orderedSigns[sign].line){
+                $(self.shadowRoot.querySelector('#lineNumber')).html('Line ' + currentLine)
+                tabletNumber = orderedSigns[sign].number
+                tabletSeason = orderedSigns[sign].season;
+                tabletView = orderedSigns[sign].view;
+                img.src = "../images/signs/" + orderedSigns[sign].sign + ".png";
+                var imageSign = document.createAttribute('data-sign')
+                imageSign.value = orderedSigns[sign].sign;
+                img.setAttributeNode(imageSign)
+                self.root.querySelector('#signs-scroll').appendChild(img);
+              }
+            }
+          }
+        }
+        $(this.root.querySelector('#nextLine')).on('click', function(){
+          //check if we can go to the next line
+          var lines = linesOfSigns;
+          var nextLine = parseInt(currentLine) + 1;
+          for(line in lines){
+            for(sign in lines[line]){
+              var img = new Image();
+              if(nextLine == lines[line][sign].line){
+                currentLine = nextLine;
+                nextLine = null;
+                $(self.shadowRoot.querySelector('#signs-scroll')).html('Line').html('')
+                $(self.shadowRoot.querySelector('#lineNumber')).html('');
+                $(self.shadowRoot.querySelector('#lineNumber')).html('Line ' + currentLine);
+              }
+              if(currentLine == lines[line][sign].line){
+                img.src = "../images/signs/" + lines[line][sign].sign + ".png";
+                var imageSign = document.createAttribute('data-sign')
+                imageSign.value = lines[line][sign].sign;
+                img.setAttributeNode(imageSign)
+                self.root.querySelector('#signs-scroll').appendChild(img);
+              }
+            }
+          }
+        })
+        $(this.root.querySelector('#previousLine')).on('click', function(){
+          //check if we can go to the next line
+          var lines = linesOfSigns;
+          var nextLine = parseInt(currentLine) - 1;
+          for(line in lines){
+            for(sign in lines[line]){
+              var img = new Image();
+              if(nextLine == lines[line][sign].line){
+                currentLine = nextLine;
+                nextLine = null;
+                $(self.shadowRoot.querySelector('#signs-scroll')).html('Line').html('')
+                $(self.shadowRoot.querySelector('#lineNumber')).html('');
+                $(self.shadowRoot.querySelector('#lineNumber')).html('Line ' + currentLine);
+              }
+              if(currentLine == lines[line][sign].line){
+                img.src = "../images/signs/" + lines[line][sign].sign + ".png";
+                var imageSign = document.createAttribute('data-sign')
+                imageSign.value = lines[line][sign].sign;
+                img.setAttributeNode(imageSign)
+                self.root.querySelector('#signs-scroll').appendChild(img);
+              }
+            }
+          }
+        })
+        function getAllImages(imageList, tablet, obj){
+          Promise.all(imageList).then(function(results){
+            for(item in results){
+                //NOW WE SET IT IN THE TABLET IMAGE')
+              if(results[item]){
+                var newPath = '/tablets/new/' + results[item].tablet.season + '/' + results[item].tablet.number + '/' + results[item].obj
+                // var imagePath = 'tablets/' + results[item].tablet.season + '/' + results[item].tablet.number +
+                firebase.database().ref('users/'+ user.uid + newPath + '/' + 'status').set('NOT STARTED')
+                firebase.database().ref('users/'+ user.uid + newPath + '/' + 'location').set(results[item].location)
+              }else{
+                console.log('NO image for ', tablet.view)
+              }
+            }
+            location.reload();
+          })
+        }
+        $(this.root.querySelector('#nextImage')).on('click', function(){
+          var newPath = tabletSeason + '/' + tabletNumber + '/' + tabletView
+          firebase.database().ref('users/'+ user.uid + '/tablets/complete/' + newPath + '/' + 'status').set('DONE');
+          firebase.database().ref('users/'+ user.uid + '/tablets/complete/' + newPath + '/' + 'location').set(tabletLocation);
+          firebase.database().ref('users/'+ user.uid + '/tablets/new/' + newPath).remove();
+          location.reload();
+        })
+        function getTabletImage(tablet, obj){
+          return new Promise(function(resolve, reject){
+            var path = 'tablets/' + tablet.season + '/' + tablet.number + '/' + obj;
+            firebase.database().ref(path).once('value').then(function(snapshot) {
+              //eventually get multiple images if they exist
+              snapshot.forEach(function(childSnapshot) {
+                var childPath = childSnapshot.key;
+                var location;
+                var i = 0;
+                var found = false;
+                while(i < 10){
+                  var exists = checkChildren(snapshot.child(childPath).val());
+                  if(exists === true){ i = 10; }
+                  if(i === 9){ resolve(false) }
+                  i++;
+                }
+                function checkChildren(obj){
+                  for(child in obj){
+                    if(obj[child].hasOwnProperty('location')){
+                      location = obj[child].location;
+                      return true;
+                    }
+                    childPath = childPath + '/' + child ;
+                  }
+                }
+                var tabletInfo = {
+                  location: location,
+                  tablet: tablet,
+                  obj: obj
+                }
+                resolve(tabletInfo);
+              })
+            })
+          })
+        }
+        function getNextTablet(index){
+          return new Promise(function(resolve, reject){
+            firebase.database().ref('signs').orderByKey().startAt(index).limitToFirst(2).once('value').then(function(snapshot) {
+              snapshot.forEach(function(childSnapshot) {
+                if(childSnapshot.key != index){
+                  firebase.database().ref('users/'+ user.uid + '/nextTablet/').set(childSnapshot.key);
+                  resolve(childSnapshot.val());
+                }
+              })
+            })
+          })
+        }
+        function getUserTablets() {
+          return new Promise(function(resolve, reject){
+            try{
+              firebase.database().ref('users/'+ user.uid + '/tablets/new').once('value').then(function(snapshot) {
+                if(snapshot.hasChild('Kt94k')){
+                  snapshot.forEach(function(childSnapshot){
+                    childSnapshot.forEach(function(grandChildSnapshot){
+                      grandChildSnapshot.forEach(function(greatGrandChildSnapshot){
+                        greatGrandChildSnapshot.forEach(function(lastChildSnapshot){
+                          if(lastChildSnapshot.key === 'status'){
+                            if(lastChildSnapshot.val() === 'NOT STARTED'){
+                              var imageLocation = childSnapshot.key + '/' + grandChildSnapshot.key + '/' + greatGrandChildSnapshot.val().location
+                              var imageInfo = {
+                                season: childSnapshot.key,
+                                number: grandChildSnapshot.key,
+                                view: greatGrandChildSnapshot.key,
+                                imageLocation: imageLocation
+                              }
+                              resolve(imageInfo)
+                            }
+                          }
+                        })
+                      })
+                    })
+                  })
+                }else{
+                  resolve(false)
+                }
+              })
+            }catch(error){
+              console.log('error', error)
+            }
+          })
+        }
+        function hotspot(id, left, top, width, height, sign){
           this.id = id;
           this.x = left;
           this.y = top;
           this.width = width;
           this.height = height;
-          this.html = "<img src='../images/signs/" + sign + ".png' id = '"+ 'one' + "' class='graph'>"//get the correct ID from Firebase
+          this.html = "<img src='../images/signs/" + sign + ".png' id = '"+ 'one' + "' class='graph'>"
         }
         hotspot.prototype.attachHotspot = function(){
           var tablet = self.shadowRoot.querySelector('#Tablet');
@@ -138,35 +411,59 @@
           var height = tablet.height * this.height;
           var attachedGraph = $(this.html).clone();
           var imageAreaDrop = self.shadowRoot.querySelector('#imageArea');
-          var imageHTML = '<img style="background-color: black; position: absolute; left:'+ left+ '%; top:'+ top+ '%; width:'+ width+ 'px; height:'+ height+ 'px;" src="'+ attachedGraph[0].src +'">';
+          var imageHTML = '<img style="background-color: black; position: absolute; left:'+ left+ '%; top:'+ top+ '%; width:'+ width+ 'px; height:'+ height+ 'px;" id = "image'+ this.id +'" class = "hotspot" src="'+ attachedGraph[0].src +'">';
+          //If we want to do drag handles all around, then we need to make the height and width be percentages
+          var newWidth = left + (this.width*100)
+          var newHeight = top + (this.height*100)
+          // var dragHandle = '<div class="handle" id = "handle'+ this.id + '" style="background-color: white; width: 15px; height: 15px; cursor: se-resize; position: absolute; left:'+ newWidth + '%;top:'+ newHeight+ '%;"></div>'
           $(imageAreaDrop).append(imageHTML)
+          // $(imageAreaDrop).append(dragHandle)
+
+          // var resizeHandle = self.shadowRoot.querySelector('#handle'+this.id);;
+          // var box = self.shadowRoot.querySelector('#image' + this.id);
+          // resizeHandle.addEventListener('mousedown', initialiseResize, false);
+          //
+          // function initialiseResize(e) {
+          // 	window.addEventListener('mousemove', startResizing, false);
+          //    	window.addEventListener('mouseup', stopResizing, false);
+          // }
+          //
+          // function startResizing(e) {
+          //    box.style.width = (e.clientX - box.offsetLeft) + 'px';
+          //    box.style.height = (e.clientY - box.offsetTop) + 'px';
+          //    resizeHandle.style.left = e.pageX;
+          //    resizeHandle.style.top = e.pageY;
+          // }
+          // function stopResizing(e) {
+          //     window.removeEventListener('mousemove', startResizing, false);
+          //     window.removeEventListener('mouseup', stopResizing, false);
+          // }
+
+
+
+
+          // $(self.root.querySelector('.hotspot')).on('mouseover', function(){
+          //   this.style.opacity = .6;
+          // })
+          // $(self.root.querySelector('.hotspot')).on('mouseout', function(){
+          //   this.style.opacity = 0;
+          // })
           //TO DO: RESIZE THE HOTSPOTS ON A WINDOW RESIZE
         }
-
-        //make each of the signs draggable
-        var nodes = this.root.querySelector('#signs-scroll').childNodes
-        for (i = 0; i < nodes.length; i++){
-          if (nodes[i].nodeName.toLowerCase() == 'img') {
-            $(nodes[i]).draggable({
-              helper: 'clone',
-            });
-           }
-        }
-
         $(tabletDropArea).droppable({
           drop: function( event, ui ) {
             var currentDraggable = $(ui.helper)[0];
-            console.log('current', currentDraggable)
             //Calculate position
             var signDataPoints = calculateSignPercentages($(currentDraggable).offset().left, $(tabletDropArea).offset().left, $(currentDraggable).offset().top, $(tabletDropArea).offset().top, currentDraggable.width, tabletDropArea.width, currentDraggable.height, tabletDropArea.height)
             var firebaseHotspot = saveHotspot(signDataPoints.left, signDataPoints.top, signDataPoints.width, signDataPoints.height, currentDraggable.dataset.sign)
-            newHotspot = new hotspot((hotspotArray.length + 1), signDataPoints.left, signDataPoints.top, signDataPoints.width, signDataPoints.height, currentDraggable.dataset.sign);
-            hotspotArray.push(newHotspot);//set position and height of image
-            newHotspot.attachHotspot()
+            firebaseHotspot.then(function(hotspotKey){
+              newHotspot = new hotspot(hotspotKey, signDataPoints.left, signDataPoints.top, signDataPoints.width, signDataPoints.height, currentDraggable.dataset.sign);
+              hotspotArray.push(newHotspot);//set position and height of image
+              newHotspot.attachHotspot()
+            })
           }
         });
-
-        var calculateSignPercentages = function(uix, tabletx, uiy, tablety, uiwidth, tabletwidth, uiheight, tabletheight){
+        function calculateSignPercentages(uix, tabletx, uiy, tablety, uiwidth, tabletwidth, uiheight, tabletheight){
           return {
             left: ((uix - tabletx)/(tabletwidth - tabletx)),
             top: ((uiy - tablety)/(tabletheight - tablety)),
@@ -174,17 +471,22 @@
             height: (uiheight/tabletheight),
           }
         } //calculateSignPercentages
-        var saveHotspot = function(left, top, width, height, sign){
-          console.log('in the save hotspot')
-          firebase.database().ref('hotspot').push({
-              left: left,
-              top: top,
-              width: width,
-              height: height,
-              sign: sign
-          });
-        }
-      }//Ready
+        function saveHotspot (left, top, width, height, sign){
+          return new Promise(function(resolve, reject){
+            var date = new Date().getTime();
+            var hotspotData = {
+              'left': left,
+              'top': top,
+              'width': width,
+              'height': height,
+              'sign': sign,
+              'date': date,
+            }
+            firebase.database().ref('tablets/' + tabletLocation + '/hotspots').push(hotspotData);
+            resolve(firebase.database().ref('users/'+ user.uid + '/hotspots/' + tabletLocation).push(hotspotData).key)
+          })//Promise
+        }//saveHotspot
+      },//Ready
     });//Polymer
   </script>
 </dom-module>
