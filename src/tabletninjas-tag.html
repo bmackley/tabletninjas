@@ -118,7 +118,7 @@
         var tabletDropArea = this.root.querySelector('#Tablet')
         var tabletSeason, tabletNumber, tabletView, tabletLocation;
         var hotspotArray = [];
-        var signs = [];
+        var linesOfSigns = [];
         var currentLine;
         var userLastTablet;
         $(this.root.querySelector('#Tablet')).on('load', function(){
@@ -148,22 +148,22 @@
         function getHotspots(){
           return new Promise(function(resolve, reject){
             firebase.database().ref('users/'+ user.uid + '/hotspots/' + tabletLocation).once('value').then(function(snapshot) {
-              console.log('hotspots', snapshot.val())
               resolve(snapshot.val())
             })
           })
         }
-        var userData = getUser();
+        var userData = getUserTablets();
         userData.then(function(data){
           if(data){
             var signsPath = 'signs/' + data.season + data.number + '/view/' +  data.view + '/line/';
             var databaseSigns = getSigns(signsPath);
             databaseSigns.then(function(data){
-              signs = $.map(data, function(value, index) {
+              lines = $.map(data, function(value, index) {
                   return [value];
               });
-              showSigns(signs);
-              // lines.sort(compare);
+              var newSignsData = orderSigns(data)
+              linesOfSigns = newSignsData;
+              showSigns(newSignsData);
             })
             tabletLocation = data.imageLocation;
             var pathReference = firebase.storage().ref('tablets/' + data.imageLocation);
@@ -175,15 +175,24 @@
               console.log('error', error)
             })
           }else{
-            var tablet = getNextTablet('1')
-            tablet.then(function(tablet){
-              console.log('tablet', tablet)
+            firebase.database().ref('users/'+ user.uid + '/nextTablet').once('value').then(function(snapshot) {
+              var tablet = getNextTablet(snapshot.val())
               var imagePromises = []
-              for(obj in tablet.view){
-                imagePromises.push(getTabletImage(tablet, obj))
+              tablet.then(function(tablet){
+                for(obj in tablet.view){
+                  imagePromises.push(getTabletImage(tablet, obj))
+                  //var tabletImage = getTabletImage(tablet, obj)
+                  // tabletImage.then(function(data){
+                  //   var newPath = '/tablets/new/' + data.tablet.season + '/' + data.tablet.number + '/' + data.obj
+                  //   // var imagePath = 'tablets/' + results[item].tablet.season + '/' + results[item].tablet.number +
+                  //   firebase.database().ref('users/'+ user.uid + newPath + '/' + 'status').set('NOT STARTED')
+                  //   firebase.database().ref('users/'+ user.uid + newPath + '/' + 'location').set(data.location)
+                  // })
+                }// for
                 getAllImages(imagePromises);
-              }// for
-            }) //tablet
+                //console.log('image promises', imagePromises)
+              }) //tablet
+            })
           }
         })//user data
         function getSigns(path){
@@ -193,56 +202,50 @@
             });
           })
         }
-
-        function showSigns(signs){
-          // console.log('signs', signs)
-          // //var lines = signs.sort(compare);
-          // console.log('lines', lines)
-          var lines = signs;
+        function orderSigns(data){
+          var allOrderedSigns = [];
           for(line in lines){
-            console.log('line', lines[line])
             var orderedSigns = $.map(lines[line], function(value, index) {
-                [value].sort(compare)
                 return [value];
             });
-            console.log('orderedSigns', orderedSigns)
-            for(sign in lines[line]){
+            orderedSigns.sort(compare);
+            allOrderedSigns.push(orderedSigns);
+          }
+          return allOrderedSigns;
+        }
+        function compare(a, b) {
+          if (a.position < b.position)
+            return -1;
+          if (a.position > b.position)
+            return 1;
+          return 0;
+        }
+        function showSigns(lines){
+          for(line in lines){
+            var orderedSigns = $.map(lines[line], function(value, index) {
+                return [value];
+            });
+            orderedSigns.sort(compare);
+            for(sign in orderedSigns){
               var img = new Image(); // width, height values are optional params
-              // tabletNumber = newsigns[sign].number
-              // tabletSeason = newsigns[sign].season;
-              // tabletView = lines[line][sign].view;
-              if(currentLine){}else{currentLine = lines[line][sign].line }
-              if(currentLine === lines[line][sign].line){
+              if(currentLine){}else{currentLine = orderedSigns[sign].line }
+              if(currentLine === orderedSigns[sign].line){
                 $(self.shadowRoot.querySelector('#lineNumber')).html('Line ' + currentLine)
-                //   tabletNumber = newsigns[sign].number
-                //   tabletSeason = newsigns[sign].season;
-                //   tabletView = newsigns[sign].view;
-                img.src = "../images/signs/" + lines[line][sign].sign + ".png";
+                tabletNumber = orderedSigns[sign].number
+                tabletSeason = orderedSigns[sign].season;
+                tabletView = orderedSigns[sign].view;
+                img.src = "../images/signs/" + orderedSigns[sign].sign + ".png";
                 var imageSign = document.createAttribute('data-sign')
-                imageSign.value = lines[line][sign].sign;
+                imageSign.value = orderedSigns[sign].sign;
                 img.setAttributeNode(imageSign)
                 self.root.querySelector('#signs-scroll').appendChild(img);
               }
             }
           }
-          function compare(a, b) {
-            console.log('a', a)
-            console.log('b', b)
-            console.log('a', a.position)
-            // if (a.line < b.line)
-            //   return -1;
-            // if (a.line > b.line)
-            //   return 1;
-            if (a.position < b.position)
-              return -1;
-            if (a.position > b.position)
-              return 1;
-            return 0;
-          }
         }
         $(this.root.querySelector('#nextLine')).on('click', function(){
           //check if we can go to the next line
-          var lines = signs;
+          var lines = linesOfSigns;
           var nextLine = parseInt(currentLine) + 1;
           for(line in lines){
             for(sign in lines[line]){
@@ -264,7 +267,30 @@
             }
           }
         })
-
+        $(this.root.querySelector('#previousLine')).on('click', function(){
+          //check if we can go to the next line
+          var lines = linesOfSigns;
+          var nextLine = parseInt(currentLine) - 1;
+          for(line in lines){
+            for(sign in lines[line]){
+              var img = new Image();
+              if(nextLine == lines[line][sign].line){
+                currentLine = nextLine;
+                nextLine = null;
+                $(self.shadowRoot.querySelector('#signs-scroll')).html('Line').html('')
+                $(self.shadowRoot.querySelector('#lineNumber')).html('');
+                $(self.shadowRoot.querySelector('#lineNumber')).html('Line ' + currentLine);
+              }
+              if(currentLine == lines[line][sign].line){
+                img.src = "../images/signs/" + lines[line][sign].sign + ".png";
+                var imageSign = document.createAttribute('data-sign')
+                imageSign.value = lines[line][sign].sign;
+                img.setAttributeNode(imageSign)
+                self.root.querySelector('#signs-scroll').appendChild(img);
+              }
+            }
+          }
+        })
         function getAllImages(imageList, tablet, obj){
           Promise.all(imageList).then(function(results){
             for(item in results){
@@ -278,22 +304,20 @@
                 console.log('NO image for ', tablet.view)
               }
             }
+            location.reload();
           })
-          .catch(function(err){console.log('error', err)})
         }
-
         $(this.root.querySelector('#nextImage')).on('click', function(){
-          var newPath = 'tablets/' + tabletSeason + '/' + tabletNumber + '/' + tabletView
-          firebase.database().ref('users/'+ user.uid + '/' + newPath + '/' + 'status').set('DONE');
+          var newPath = tabletSeason + '/' + tabletNumber + '/' + tabletView
+          firebase.database().ref('users/'+ user.uid + '/tablets/complete/' + newPath + '/' + 'status').set('DONE');
+          firebase.database().ref('users/'+ user.uid + '/tablets/complete/' + newPath + '/' + 'location').set(tabletLocation);
+          firebase.database().ref('users/'+ user.uid + '/tablets/new/' + newPath).remove();
           location.reload();
         })
-
         function getTabletImage(tablet, obj){
           return new Promise(function(resolve, reject){
-            console.log('getTabletImage tablet', tablet, obj)
             var path = 'tablets/' + tablet.season + '/' + tablet.number + '/' + obj;
             firebase.database().ref(path).once('value').then(function(snapshot) {
-              console.log(snapshot.val())
               //eventually get multiple images if they exist
               snapshot.forEach(function(childSnapshot) {
                 var childPath = childSnapshot.key;
@@ -320,7 +344,6 @@
                   tablet: tablet,
                   obj: obj
                 }
-                console.log('tablet info', tabletInfo)
                 resolve(tabletInfo);
               })
             })
@@ -331,20 +354,20 @@
             firebase.database().ref('signs').orderByKey().startAt(index).limitToFirst(2).once('value').then(function(snapshot) {
               snapshot.forEach(function(childSnapshot) {
                 if(childSnapshot.key != index){
+                  firebase.database().ref('users/'+ user.uid + '/nextTablet/').set(childSnapshot.key);
                   resolve(childSnapshot.val());
                 }
               })
             })
           })
         }
-        function getUser() {
+        function getUserTablets() {
           return new Promise(function(resolve, reject){
             try{
               firebase.database().ref('users/'+ user.uid + '/tablets/new').once('value').then(function(snapshot) {
                 if(snapshot.hasChild('Kt94k')){
                   snapshot.forEach(function(childSnapshot){
                     childSnapshot.forEach(function(grandChildSnapshot){
-                      // console.log('gcsnapshot key', grandChildSnapshot.key)
                       grandChildSnapshot.forEach(function(greatGrandChildSnapshot){
                         greatGrandChildSnapshot.forEach(function(lastChildSnapshot){
                           if(lastChildSnapshot.key === 'status'){
@@ -372,7 +395,6 @@
             }
           })
         }
-
         function hotspot(id, left, top, width, height, sign){
           this.id = id;
           this.x = left;
@@ -381,7 +403,6 @@
           this.height = height;
           this.html = "<img src='../images/signs/" + sign + ".png' id = '"+ 'one' + "' class='graph'>"
         }
-
         hotspot.prototype.attachHotspot = function(){
           var tablet = self.shadowRoot.querySelector('#Tablet');
           var left = (this.x) * 100;
@@ -429,7 +450,6 @@
           // })
           //TO DO: RESIZE THE HOTSPOTS ON A WINDOW RESIZE
         }
-
         $(tabletDropArea).droppable({
           drop: function( event, ui ) {
             var currentDraggable = $(ui.helper)[0];
@@ -443,7 +463,6 @@
             })
           }
         });
-
         function calculateSignPercentages(uix, tabletx, uiy, tablety, uiwidth, tabletwidth, uiheight, tabletheight){
           return {
             left: ((uix - tabletx)/(tabletwidth - tabletx)),
@@ -468,10 +487,6 @@
           })//Promise
         }//saveHotspot
       },//Ready
-      // getNextImage: function(){
-      //   console.log('getting the next image')
-      //   console.log('tabletloc', tabletLocation)
-      // }
     });//Polymer
   </script>
 </dom-module>
