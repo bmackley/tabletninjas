@@ -201,7 +201,7 @@
           console.log('in the line dat')
           return new Promise(function(resolve, reject) {
             try{
-              firebase.database().ref('identified_characters').startAt('1').endAt('15000').orderByKey().limitToFirst(10000).once('value').then(function(snapshot) {
+              firebase.database().ref('identified_characters').startAt('1').endAt('5000').orderByKey().limitToFirst(5000).once('value').then(function(snapshot) {
               //firebase.database().ref('identified_characters').once('value').then(function(snapshot) {
                 resolve(snapshot.val());
               });
