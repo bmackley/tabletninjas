@@ -1,4 +1,18 @@
-# Polymer App Toolbox - Starter Kit
+# README
+
+Tablet Ninjas is an application built to interest users in helping 
+machines learn how to identify ancient cuneifrom writing.
+The user drags the characters shown on the bottom to match
+the characters on the tablet's image.
+With everything provided and in order, the process is smooth
+and will even spark an interest in ancient history!
+
+Tablet Ninjas is built using the Polymer Starter Kit v1.
+
+The following README takes elements from the [Polymer Starter Kit](https://github.com/PolymerElements/polymer-starter-kit) 
+with modified instructions for Tablet Ninjas written by Rebekah Fowles.
+
+## Information About the Polymer Starter Kit
 
 [![Build Status](https://travis-ci.org/PolymerElements/polymer-starter-kit.svg?branch=master)](https://travis-ci.org/PolymerElements/polymer-starter-kit)
 
@@ -18,24 +32,36 @@ The PRPL pattern, in a nutshell:
 * **Pre-cache** components for remaining routes
 * **Lazy-load** and progressively upgrade next routes on-demand
 
-### Migrating from Polymer Starter Kit v1?
-
-[Check out our blog post that covers what's changed in PSK2 and how to migrate!](https://www.polymer-project.org/1.0/blog/2016-08-18-polymer-starter-kit-or-polymer-cli.html)
-
 ### Setup
 
-##### Prerequisites
+##### Install the Polymer Client
 
 First, install [Polymer CLI](https://github.com/Polymer/polymer-cli) using
 [npm](https://www.npmjs.com) (we assume you have pre-installed [node.js](https://nodejs.org)).
 
     npm install -g polymer-cli
 
-##### Initialize project from template
+##### Clone project from repository
 
-    mkdir my-app
-    cd my-app
-    polymer init starter-kit
+Navigate to wherever you wish to store the project on your local machine. 
+It doesn't need to be anywhere in particular.
+
+    git clone https://github.com/bmackley/tabletninjas.git
+    cd tabletninjas
+
+##### Install Bower
+
+	bower install
+
+Bower will install all the components found in `bower.json`. 
+It will create the `bower_components` directory which is absolutely VITAL to the project. 
+This directory will not get saved to the repository when pushed. (See the `.gitignore` file.)
+
+##### Install Node.js
+
+	npm install
+
+This will create the `node_modules` directory. It is also exempted in the `.gitignore` file.
 
 ### Start the development server
 
@@ -43,6 +69,10 @@ This command serves the app at `http://localhost:8080` and provides basic URL
 routing for the app:
 
     polymer serve --open
+
+NOTE: Due to some bug in the Polymer Starter Kit's code, 
+the default location is `http://127.0.0.1:8081/components/polymer-starter-kit/`.
+Don't be alarmed. Just follow the link back home or change the URL yourself.
 
 ### Build
 
@@ -85,3 +115,7 @@ application. Each new demand-loaded fragment should be added to the list of
 `fragments` in the included `polymer.json` file. This will ensure those
 components and their dependencies are added to the list of pre-cached components
 and will be included in the `bundled` build.
+
+Don't forget to add additional views in the `src/my-app.html` under the `iron-selector` 
+type and `iron-pages` type. For other elements, make sure to include them wherever they 
+need to go by importing them using the `link` HTML type. 
