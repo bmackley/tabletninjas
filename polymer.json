@@ -1,6 +1,6 @@
 {
   "entrypoint": "index.html",
-  "shell": "src/my-app.html",
+  "shell": "src/tabletninjas-app.html",
   "fragments": [
     "src/tabletninjas-home.html",
     "src/tabletninjas-login.html",

@@ -16,11 +16,11 @@
       display: flex;
       flex-direction: column;
     }*/
-    #Tablet{
+    #Tablet {
       width: 100%;
       position: absolute;
     }
-    #imageArea{
+    #imageArea {
       position: relative;
     }
     #footer-container {
@@ -29,82 +29,119 @@
       position: fixed;
       bottom:0px;
       opacity: .85;
-      height: inherit;
+      height: 25%;
       color: white;
       z-index: 1000;
-      /*max-height: 22%;*/
     }
-    #signs{
+    #footer-controls {
+      height: 30%;
+    }
+    #signs {
       overflow: auto;
       white-space: nowrap;
-      height: inherit;
-    }
-    #signs > * {
-      vertical-align: middle;
+      height: 70%;
     }
     #signs #signs-scroll {
       display: inline-block;
       height: inherit;
-      /*max-height: 20%*/
+      height: 100%;
+      width: 100%;
     }
     #signs img {
-      max-width: 11%;
+      max-width: 10%;
       display: inline-block;
-      max-height: 150px;
+      max-height: 100%;
+      vertical-align: middle;
       /*maybe figure out a way to get the images on the same line and to scroll?*/
     }
-    .selected{
+    .selected {
       border: solid;
       border-width: 2px;
       border-color: white;
       background-color: black;
       opacity: .4;
     }
-    .hotspot{
+    .hotspot {
       border: solid;
     }
     .graph {
       background-color: orange;
       display: block;
     }
-    .big{
+    .big {
       --iron-icon-fill-color: white;
-
       --iron-icon-width: 5%;
       border-color: white;
       border-style: solid;
-      border-radius:15%
+      border-radius:15%;
+      margin: 5px;
     }
-    paper-button{
+    .big#toggleDown, .big#toggleUp {
+      --iron-icon-width: 2%;
+    }
+    .big:hover {
+      border-color: gray;
+      fill: gray;
+    }
+    .big:active {
+      border-color: gray;
+      fill: gray;
+      background: silver;
+    }
+    #lineNumber {
+      margin: 0 10px;
+      color: white;
+      font-size: x-large;
+      vertical-align: middle;
+    }
+    #deleteLocation {
+      display: inline-block;
+    }
+    #deleteButton .big {
+      padding: 0 15px;
+    }
+    paper-button {
       border-color: white;
       border-width: 2px;
       border-style: solid;
-      margin-top: 5px;
+      margin: 5px;
+      padding: 5px 10px;
+      float: right;
     }
-    body{
+    .hide {
+      display: none;
+    }
+    body {
       color: white;
     }
 
   </style>
   <template>
     <tabletninjas-header></tabletninjas-header>
-    <div id = "imageArea">
-      <img id ='Tablet' class = "hbwrap droppable">
+    <div id="imageArea">
+      <img id='Tablet' class="hbwrap droppable">
       <!-- src ="../images/KUG03-obv-01.jpg" -->
     </div>
-    <div id = "footer-container">
-      <div class ="black-background"><iron-icon class = "big" icon="arrow-back" id="previousLine"></iron-icon><span style="color:white" id = "lineNumber">Line 1</span><iron-icon class = "big" icon="arrow-forward" id="nextLine"></iron-icon><span id ="deleteLocation"></span></div>
-      <center><paper-button id="nextImage">Tagging Complete</paper-button></center>
-      <div id = "signs">
-        <span id = "signs-scroll">
+    <div id="footer-container">
+      <div id="footer-controls">
+        <iron-icon class="big" icon="arrow-drop-down" id="toggleDown"></iron-icon>
+        <iron-icon class="big hide" icon="arrow-drop-up" id="toggleUp"></iron-icon>
+        <span id="lineNumber">Line 1</span>
+        <iron-icon class="big hide" icon="arrow-back" id="previousLine"></iron-icon>
+        <iron-icon class="big" icon="arrow-forward" id="nextLine"></iron-icon>
+        <span id="deleteLocation"></span>
+        <paper-button id="nextImage">Tagging Complete!</paper-button>
+      </div>
+      <div id="signs">
+        <span id="signs-scroll">
           <!-- This is where all of the Hotspots are placed -->
         </span>
       </div>
     </div>
   </template>
 
-  <script type="text/javascript" src= "../bower_components/jquery/dist/jquery.min.js"></script>
-  <script type="text/javascript" src= "../bower_components/jquery-ui/jquery-ui.js"></script>
+  <script type="text/javascript" src="../bower_components/jquery/dist/jquery.min.js"></script>
+  <script type="text/javascript" src="../bower_components/jquery-ui/jquery-ui.js"></script>
 
   </script>
   <script>
@@ -132,6 +169,21 @@
         var linesOfSigns = [];
         var currentLine, lowestLine, highestLine;
         var userLastTablet;
+        
+
+        $(this.root.querySelector('#toggleUp')).click(function() {
+          $(self.root.querySelector('#signs')).show();
+          $(self.root.querySelector('#toggleUp')).addClass('hide');
+          $(self.root.querySelector('#toggleDown')).removeClass('hide');
+          $(self.root.querySelector('#footer-container')).animate({height:'25%'}, 200);
+        });
+        $(this.root.querySelector('#toggleDown')).click(function() {
+          $(self.root.querySelector('#signs')).hide(200);
+          $(self.root.querySelector('#toggleUp')).removeClass('hide');
+          $(self.root.querySelector('#toggleDown')).addClass('hide');
+          $(self.root.querySelector('#footer-container')).animate({height:'7%'}, 200);
+        });
+
         $(this.root.querySelector('#Tablet')).on('load', function(){
           var height = $(this).css('height')
           var footerHeight = self.root.querySelector('#footer-container').offsetHeight;
@@ -267,7 +319,9 @@
         }
         $(this.root.querySelector('#nextLine')).on('click', function(){
           //check if we can go to the next line
+          $(self.root.querySelector("#previousLine")).removeClass('hide');
           if(currentLine == highestLine){
+            $(self.root.querySelector('#nextLine')).addClass('hide');
             return;
           }
           var lines = linesOfSigns;
@@ -293,6 +347,7 @@
             }
           }
           draggableInit();
+
         })
         $(this.root.querySelector('#previousLine')).on('click', function(){
           //check if we can go to the next line
@@ -300,7 +355,9 @@
           var nextLine = parseInt(currentLine) - 1;
           console.log('currentLine', currentLine)
           console.log('lowestLine', lowestLine)
+          $(self.root.querySelector("#nextLine")).removeClass('hide');
           if(currentLine == lowestLine){
+            $(self.root.querySelector('#previousLine')).addClass('hide');
             return;
           }
           for(line in lines){
@@ -324,6 +381,7 @@
           }
           draggableInit();
         })
+
         function getAllImages(imageList, tablet, obj){
           Promise.all(imageList).then(function(results){
             for(item in results){
@@ -588,7 +646,7 @@
           return new Promise(function(resolve, reject){
             var date = new Date().getTime();
             var hotspotData = {
-              'left': left,
+              'left': left, 
               'top': top,
               'width': width,
               'height': height,

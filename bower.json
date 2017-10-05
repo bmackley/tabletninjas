@@ -34,7 +34,9 @@
     "iron-dropdown": "PolymerElements/iron-dropdown#^1.5.5",
     "polymerfire": "firebase/polymerfire#^0.10.3",
     "interactjs": "^1.2.8",
-    "paper-tooltip": "PolymerElements/paper-tooltip#^1.1.3"
+    "paper-tooltip": "PolymerElements/paper-tooltip#^1.1.3",
+    "jquery": "^3.2.1",
+    "jquery-ui": "^1.12.1"
   },
   "devDependencies": {
     "web-component-tester": "^4.0.0"

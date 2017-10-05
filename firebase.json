@@ -1,6 +1,6 @@
 {
   "firebase": "tabletninjas",
-  "public": "build/unbundled",
+  "public": "build/default",
   "rewrites": [
     {
       "source": "!/__/**",
