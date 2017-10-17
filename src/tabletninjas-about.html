@@ -1,0 +1,108 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<!-- <link rel="import" href="../bower_components/paper-dialog/paper-dialog.html"> -->
+<!-- <link rel="import" href="tabletninjas-login.html"> -->
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="tabletninjas-about">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+      }
+      #tabletninjas-background{ 
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url('../images/homeTablet.jpeg') center;
+        background-size: cover;
+        color: white;
+        overflow-y: auto;
+      }
+      #info-box {
+        background-color: rgba(0,0,0,0.8);
+        width: 70%;
+        padding: 10px 50px;
+        margin: 50px auto;
+      }
+      #action-items{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        top:20%;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        margin: auto;
+      }
+      paper-button.maroon{
+        background-color: maroon;
+      }
+      a{
+        color: inherit;
+        text-decoration: none;
+      }
+      h1, p {
+        color: white;
+      }
+    </style>
+    <div id="tabletninjas-background">
+      <div id="info-box">
+        <div id ="action-items">
+          <a href="/home"><paper-button class="maroon">Go Back</paper-button></a>
+      </div>
+
+      <h1>
+        About Tablet Ninjas
+      </h1>
+      
+      <p>
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed porttitor ex vel congue lacinia. Nulla ut ornare sapien. Integer quis risus mauris. Proin porttitor nunc ut urna commodo, quis gravida tortor ullamcorper. Etiam sit amet quam eros. Mauris pulvinar eget ligula a tristique. Duis cursus egestas ligula, id hendrerit dolor efficitur ac. Maecenas non lacus a eros consectetur efficitur.
+      </p>
+      <p>
+      Maecenas hendrerit id ex vitae consequat. Nullam commodo varius elit, sit amet tristique nunc sodales eget. Integer tincidunt ultricies auctor. Nulla facilisi. Nunc sagittis, nunc vel ultrices imperdiet, tortor risus tincidunt ipsum, ac pharetra risus tortor vitae mi. Sed lorem leo, sodales eu sodales a, malesuada eget nibh. Duis felis nisi, varius sed viverra eget, finibus sed turpis. Sed eu quam sed diam tempor sollicitudin. Integer quis arcu augue. Maecenas vel nisl tellus. Donec mollis purus aliquet, pharetra quam vitae, mollis erat. Aliquam ullamcorper sed sapien vitae tristique. Sed consequat augue vitae laoreet dapibus. Vivamus convallis viverra efficitur.
+      </p>
+      <p>
+      Phasellus in dolor euismod sem aliquet eleifend et vel magna. Duis condimentum faucibus turpis, id blandit elit. Sed vitae libero quis eros mollis imperdiet. Sed consequat ante quam. Vivamus ac urna dui. In in placerat arcu, quis faucibus metus. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Nullam commodo fringilla sollicitudin. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Fusce sit amet iaculis dolor.
+      </p>
+      <p>
+      Aenean luctus, quam quis malesuada interdum, enim risus rhoncus turpis, porttitor tristique dui ante nec orci. Proin ut lectus tellus. Integer pulvinar, ex quis gravida ultricies, erat sem accumsan tortor, et tincidunt elit nibh ut augue. Aliquam felis velit, posuere in elit sit amet, laoreet malesuada metus. Aliquam id diam vitae nunc laoreet sodales. Nam mattis ligula in neque auctor sodales. Pellentesque neque erat, pulvinar at efficitur iaculis, commodo id enim. Praesent aliquam tellus non nunc condimentum, id dictum enim maximus. Aenean pellentesque aliquam tellus ullamcorper auctor. Suspendisse fermentum iaculis justo, at rhoncus lorem aliquam vitae. Donec aliquam at enim quis ultrices.
+      </p>
+      <p>
+      Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Praesent quis porta augue. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Vivamus a feugiat quam. Etiam semper placerat consectetur. Duis in tristique sem. Curabitur nec nunc a dolor feugiat semper sit amet vel massa. Nulla non sagittis diam. Donec placerat, libero at bibendum interdum, lorem nibh ullamcorper leo, ut euismod eros sapien et sapien. Vestibulum nec scelerisque justo. Fusce consequat nisl a nunc dapibus iaculis. Sed ornare tellus ex, sit amet tincidunt tellus imperdiet vitae. Duis sodales eu nibh non tincidunt. Pellentesque auctor quis dui sit amet porttitor. Curabitur sit amet interdum justo.
+      </p>
+      <p>
+      Quisque bibendum, mi ac mattis hendrerit, nibh arcu lobortis nibh, a ullamcorper nibh nunc eget ante. Nunc gravida lacus nec erat vestibulum venenatis vel elementum libero. Donec nulla sem, viverra tempor feugiat tempus, pharetra sed massa. Fusce quis mi tincidunt, finibus eros sed, lobortis nibh. Donec ultricies fringilla sapien, eu sagittis nisi lobortis non. Sed ac lobortis mauris. Vivamus orci metus, condimentum vitae egestas vitae, porttitor vel ex. Quisque pharetra elit lacus, sed semper erat feugiat at. Phasellus vitae tortor ut est vulputate laoreet. Morbi tellus ex, malesuada at scelerisque eget, tincidunt quis sem. Mauris et purus at risus feugiat convallis vel non quam. Nullam pulvinar libero lacus, cursus pulvinar metus lobortis et. Curabitur feugiat eleifend est, a placerat tellus egestas ut. Vivamus eu augue non mauris placerat porttitor.
+      </p>
+      <p>
+      Nulla elementum, tellus nec ornare mollis, est nisi posuere massa, sed cursus magna lectus et ligula. Donec eu aliquet augue, sed bibendum lectus. Maecenas finibus leo ut faucibus sagittis. Curabitur tempus, ante quis mattis feugiat, dui purus sagittis massa, at tincidunt dolor nulla eu velit. Nullam dictum ornare ornare. Etiam et hendrerit erat. Nulla eu dui porttitor, vehicula sem vitae, finibus quam. Nunc eget dolor varius enim finibus cursus ac vitae massa. Sed eu tellus turpis.
+      </p>
+      <p>
+      Duis nibh felis, commodo vel pulvinar vitae, tincidunt eget ex. Vestibulum consequat, lectus vitae semper posuere, velit massa sollicitudin quam, nec vulputate ipsum est in nunc. Sed lorem dolor, varius ac finibus vitae, mattis ac felis. Pellentesque rhoncus, est placerat pharetra posuere, tortor lacus mollis nisi, ac vehicula enim metus sit amet erat. Phasellus malesuada interdum dapibus. In nisl orci, congue gravida tempor sed, tempus eu odio. Etiam sit amet massa rutrum, mattis ipsum quis, vulputate dui. Ut lacinia venenatis purus. Nam congue porta mi. Nulla vitae ipsum non arcu porttitor viverra imperdiet non velit. In augue lacus, ultricies at augue id, venenatis vestibulum augue. Integer pretium bibendum justo ut pulvinar.
+      </p>
+      <p>
+      Duis tempor, metus non mattis consectetur, nulla ante gravida enim, sed eleifend turpis lectus sed leo. Suspendisse posuere hendrerit ex sed euismod. In quis metus in elit scelerisque congue. Cras ultricies venenatis eros ut ullamcorper. Aliquam hendrerit ipsum nec metus pellentesque euismod. In hac habitasse platea dictumst. Integer rutrum nisl sed metus bibendum accumsan. Phasellus in mattis eros, et lacinia est. Nam laoreet pretium orci id sollicitudin. Cras posuere metus eu diam scelerisque, ornare tempor sapien congue. Aenean tincidunt dui tristique, suscipit quam sit amet, egestas diam. Aenean ornare pellentesque sapien at aliquet. Nam eleifend odio ante, vitae dapibus enim porta ullamcorper. Morbi fermentum ipsum ac ex tincidunt condimentum.
+      </p>
+      <p>
+      Nam commodo, eros at pellentesque ullamcorper, sapien mauris efficitur lectus, et laoreet ipsum lacus vitae purus. Maecenas nec bibendum odio, in mattis neque. Curabitur fringilla vitae urna nec vulputate. Vestibulum tincidunt sem ultrices nibh sodales, sit amet lacinia metus varius. Praesent efficitur erat urna, sed dictum ligula tincidunt nec. Donec sit amet felis eu dui tempor faucibus eu vitae ex. Pellentesque gravida vulputate ex quis consectetur. Aliquam ornare neque a tempus accumsan. Mauris dictum neque et gravida cursus. Interdum et malesuada fames ac ante ipsum primis in faucibus. Vivamus eu sagittis arcu. Nunc interdum posuere consequat. Mauris pulvinar elementum velit, sit amet condimentum ex mollis ut.
+      </p>
+
+      <div id ="action-items">
+          <a href="/home"><paper-button class="maroon">Go Back</paper-button></a>
+      </div>
+    </div>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'tabletninjas-about',
+      properties: {
+      },
+      ready: function() {
+      }
+    });
+  </script>
+</dom-module>

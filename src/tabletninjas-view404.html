@@ -9,22 +9,66 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 -->
 
 <link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<!-- <link rel="import" href="../bower_components/paper-dialog/paper-dialog.html"> -->
+<!-- <link rel="import" href="tabletninjas-login.html"> -->
+<link rel="import" href="shared-styles.html">
 
 <dom-module id="tabletninjas-view404">
   <template>
-    <style>
+    <style include="shared-styles">
       :host {
         display: block;
-
-        padding: 10px 20px;
+      }
+      #tabletninjas-background{ 
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url('../images/homeTablet.jpeg') center;
+        background-size: cover;
+        color: white;
+        overflow-y: auto;
+      }
+      #info-box {
+        background-color: rgba(0,0,0,0.8);
+        width: 70%;
+        padding: 10px 50px 50px;
+        margin: 50px auto;
+      }
+      #flex-items{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        top:20%;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        margin: auto;
+      }
+      paper-button.maroon{
+        background-color: maroon;
+      }
+      a{
+        color: inherit;
+        text-decoration: none;
+      }
+      p {
+        color: white;
+        font-size: xx-large;
       }
     </style>
-
-    <!-- 
-      If deploying in a folder replace href="/" with the full path to your site.
-      Such as: href=="http://polymerelements.github.io/polymer-starter-kit"
-    -->
-    Oops you hit a 404. <a href="/">Head back to home.</a>
+    <div id="tabletninjas-background">
+      <div id="info-box">
+        <div id ="flex-items">
+          <p>Oops! You hit a 404.</p>
+      </div>
+      <div id ="flex-items">
+          <a href="/home"><paper-button class="maroon">Go Home</paper-button></a>
+      </div>
+    </div>
   </template>
 
   <script>

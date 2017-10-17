@@ -3,6 +3,7 @@
   "shell": "src/tabletninjas-app.html",
   "fragments": [
     "src/tabletninjas-home.html",
+    "src/tabletninjas-about.html",
     "src/tabletninjas-login.html",
     "src/tabletninjas-tag.html",
     "src/tabletninjas-upload.html",

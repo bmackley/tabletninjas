@@ -77,13 +77,13 @@
     </div>
   </template>
   <script>
-    Polymer({
+    Polymer({ 
       is: 'tabletninjas-login',
       ready: function(){
         firebase.auth().onAuthStateChanged(function(user) {
           if (user) {
             //change this to profile once the profile page is created.
-            window.location = "/upload"
+            window.location = "/home"
           }
         });
       },
