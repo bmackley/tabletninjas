@@ -89,9 +89,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           firebase.auth().onAuthStateChanged(function(user) {
             if (user) {
               resolve(user.email);
-            } else {
-              window.location = "/login"
-            }
+            } 
           });
         })
       },

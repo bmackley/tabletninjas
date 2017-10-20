@@ -4,7 +4,7 @@
 <!-- <link rel="import" href="tabletninjas-login.html"> -->
 <link rel="import" href="shared-styles.html">
 
-<dom-module id="tabletninjas-home">
+<dom-module id="tabletninjas-user-home">
   <template>
     <style include="shared-styles">
       :host {
@@ -69,25 +69,33 @@
       <h1 id ="tablet-ninjas-title">Tablet Ninjas</h1>
       <div id = "action-items">
         <a href="/about"><paper-button class="maroon">Tell Me About It</paper-button></a>
-        <a href="/signup"><paper-button id="create-account" class="maroon">Create Account</paper-button></a>
+        <a href="/tag"><paper-button class="maroon" id="to-tablet">Go to Tablet</paper-button></a>
+      </div>
       <div id ="login-button">
-        <a href="/login"><paper-button class="white" id="paper-login">Login</paper-button></a>
+        <paper-button on-tap="logOutUser" class="white" id="paper-logout">Logout</paper-button>
       </div>
     </div>
   </template>
 
   <script>
     Polymer({
-      is: 'tabletninjas-home',
+      is: 'tabletninjas-user-home',
       properties: {
       },
       ready: function() {
         firebase.auth().onAuthStateChanged(function(user) {
-          if (user) {
-            window.location = "/user-home";
+          if (!user) {
+            window.location = "/home";
           }
         });
       },
+      logOutUser: function(){
+        firebase.auth().signOut().then(function() {
+          window.location = '/home'
+        }, function(error) {
+          alert(error)
+        });
+      }
     });
   </script>
 </dom-module>
